@@ -1,6 +1,10 @@
 import adapter from '@sveltejs/adapter-static';
 import preprocess from 'svelte-preprocess';
 
+const dev = process.env.npm_lifecycle_event === 'dev';
+
+console.log('dev:', dev);
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://github.com/sveltejs/svelte-preprocess
@@ -22,7 +26,7 @@ const config = {
 			default: true
 		},
 		paths: {
-			base: '/svelte-webvpython'
+			base: dev ? '' : '/svelte-webvpython'
 		}
 	}
 };

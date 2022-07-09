@@ -99,6 +99,10 @@ while True:
 			}}>Run</button
 		>
 	</div>
+	<div class="explainRow">
+		<p>This is a very crude attempt to demo WebVPython using Pyodide.</p>
+		<p>So far we have sphere, cone, box, arrow, helix, rate, and vector.</p>
+	</div>
 	<div id="glowscript" class="glowscript glowCol">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<script
@@ -121,34 +125,40 @@ while True:
 	.container {
 		display: grid;
 		grid-template-columns: 1fr 4fr 4fr;
-		grid-template-rows: 2fr 1fr;
+		grid-template-rows: 1fr 4fr 3fr;
 		height: 100vh;
+	}
+
+	.explainRow {
+		grid-column: 1 / -1;
+		grid-row: 1;
+		text-align: center;
 	}
 
 	.buttonCol {
 		grid-column: 1;
-		grid-row: 1;
+		grid-row: 2;
 		justify-self: center;
 		align-self: center;
 	}
 
 	.editCol {
-		grid-column: 3;
-		grid-row: 1;
+		grid-column: 2;
+		grid-row: 2;
 		height: 50vh;
 		border: 1px solid black;
 	}
 
 	.stdoutRow {
 		grid-column: 2/4;
-		grid-row: 2;
+		grid-row: 3;
 		justify-self: center;
 		align-self: center;
 	}
 
 	.glowCol {
-		grid-column: 2;
-		grid-row: 1;
+		grid-column: 3;
+		grid-row: 2;
 		height: 50vh;
 		border: 1px solid black;
 	}
