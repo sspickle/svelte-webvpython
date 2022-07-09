@@ -81,6 +81,7 @@ while True:
 			var result = await pyodide.runPythonAsync(program);
 		} catch (err) {
 			console.log('Error:' + err);
+			stdout.value += 'Error:' + err + '\n';
 		}
 	}
 
