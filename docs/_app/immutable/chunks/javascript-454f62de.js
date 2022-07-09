@@ -1,4 +1,4 @@
-import{conf as t,language as e}from"./typescript-4107f5ed.js";import"./editor.main-7ea83a81.js";import"./preload-helper-60cab3ee.js";/*!-----------------------------------------------------------------------------
+import{conf as t,language as e}from"./typescript-2cb11e66.js";import"./editor.main-e6b76b67.js";import"./preload-helper-5c232d89.js";/*!-----------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Version: 0.33.0(4b1abad427e58dbedc1215d99a0902ffc885fcd4)
  * Released under the MIT license
