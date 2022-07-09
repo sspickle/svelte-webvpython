@@ -6,16 +6,17 @@ const config = {
 	// Consult https://github.com/sveltejs/svelte-preprocess
 	// for more information about preprocessors
 	preprocess: preprocess(),
-	
 
 	kit: {
-        adapter: adapter({
-            pages: "docs",
-            assets: "docs"
-    	})},
-    paths: {
-   	    base: "/svelte-webvpython"
-    }
+		adapter: adapter({
+			pages: 'docs',
+			assets: 'docs'
+		}),
+		prerender: { default: true }
+	},
+	paths: {
+		base: '/svelte-webvpython'
+	}
 };
 
 export default config;
