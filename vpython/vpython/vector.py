@@ -1,6 +1,7 @@
 ## vectors and associated methods
 from math import cos, sin, acos, sqrt, pi
 from random import random
+from js import vec as js_vec
 
 # List of names imported from this module with import *
 __all__ = ['adjust_axis', 'adjust_up', 'comp', 'cross', 'diff_angle', 'dot',
@@ -27,6 +28,7 @@ class vector(object):
             self._z = other._z
         else:
             raise TypeError('A vector needs 3 components.')
+        self.jsObj = js_vec(self._x, self._y, self._z)
         self.on_change = self.ignore
 
     def ignore(self):
@@ -40,6 +42,9 @@ class vector(object):
         self._x = other._x
         self._y = other._y
         self._z = other._z
+        self.jsObj.x = other._x
+        self.jsObj.y = other._y
+        self.jsObj.z = other._z
 
     def __neg__(self):
         return vector(-self._x, -self._y, -self._z)
@@ -94,6 +99,7 @@ class vector(object):
     @x.setter
     def x(self,value):
         self._x = value
+        self.jsObj.x = value
         self.on_change()
 
     @property
@@ -102,6 +108,7 @@ class vector(object):
     @y.setter
     def y(self,value):
         self._y = value
+        self.jsObj.y = value
         self.on_change()
 
     @property
@@ -110,6 +117,7 @@ class vector(object):
     @z.setter
     def z(self,value):
         self._z = value
+        self.jsObj.z = value
         self.on_change()
 
     @property
@@ -121,6 +129,9 @@ class vector(object):
         self._x = value * normA._x
         self._y = value * normA._y
         self._z = value * normA._z
+        self.jsObj.x = self._x
+        self.jsObj.y = self._y
+        self.jsObj.z = self._z
         self.on_change()
 
     @property
@@ -133,6 +144,9 @@ class vector(object):
         self._x = v * normA._x
         self._y = v * normA._y
         self._z = v * normA._z
+        self.jsObj.x = self._x
+        self.jsObj.y = self._y
+        self.jsObj.z = self._z
         self.on_change()
 
     @property
@@ -149,6 +163,9 @@ class vector(object):
         self._x = smg * normA._x
         self._y = smg * normA._y
         self._z = smg * normA._z
+        self.jsObj.x = self._x
+        self.jsObj.y = self._y
+        self.jsObj.z = self._z
         self.on_change()
 
     def norm(self):
