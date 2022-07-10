@@ -3,6 +3,7 @@
 	import { srcStore } from '../stores/codeSrc';
 	import { onMount } from 'svelte';
 	import { setupGSCanvas, loadPiodide } from '../utils/utils';
+	import { base } from '$app/paths';
 
 	function redirect_stdout(theText: string) {
 		stdoutStore.update((val) => (val += theText + '\n'));
@@ -48,7 +49,7 @@
 	}
 </script>
 
-<a href="/">Edit this code</a>
+<a href="{base}/">Edit this code</a>
 <h2>Running....</h2>
 <div id="glowscript" class="glowscript" />
 <div><textarea bind:this={stdout} rows="20" cols="80" /></div>

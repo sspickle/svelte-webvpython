@@ -7,7 +7,7 @@
 	import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 	import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 	import { srcStore } from '../stores/codeSrc.js';
-	import { stdoutStore } from '../stores/stdoutSrc.js';
+	import { base } from '$app/paths';
 
 	// @ts-ignore
 	let divEl: HTMLDivElement | null = null;
@@ -50,7 +50,7 @@
 	});
 </script>
 
-<a href="/run">Run this program</a>
+<a href="{base}/run">Run this program</a>
 <div class="editor" bind:this={divEl} />
 
 <style>
