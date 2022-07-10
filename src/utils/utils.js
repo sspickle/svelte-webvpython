@@ -1,6 +1,5 @@
-export const prepGSEnvironment = async (stdRedir) => {
+export const loadPiodide = async (stdRedir) => {
 	console.log('loading prep');
-	let display, scene, canvas;
 	const pkgResponse = fetch('vpython.zip').then((x) => x.arrayBuffer());
 
 	let pyodide = await loadPyodide({
@@ -14,10 +13,16 @@ export const prepGSEnvironment = async (stdRedir) => {
 	pyodide.unpackArchive(pkgdata, 'zip');
 	console.log('Importing vpython package');
 
+	return pyodide;
+};
+
+export const setupGSCanvas = async () => {
+	let display, scene;
+
 	window.__context = {
 		glowscript_container: $('#glowscript').removeAttr('id')
 	};
 	display = window.canvas;
 	scene = display();
-	return pyodide;
+	return scene;
 };

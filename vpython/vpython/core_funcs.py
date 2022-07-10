@@ -1,4 +1,4 @@
-from js import sphere as js_sphere, box as js_box, color, vec, rate as async_rate
+from js import sphere as js_sphere, box as js_box, color, vec as js_vec, rate as async_rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
 
 def sphere(**kwargs):
