@@ -12,6 +12,10 @@
 	onMount(async () => {
 		scene = await setupGSCanvas();
 		pyodide = await loadPiodide(redirect_stdout);
+
+		//@ts-ignore
+		window.scene = scene;
+
 		stdoutStore.set('');
 		console.log('mounted', scene, pyodide);
 		runMe();
