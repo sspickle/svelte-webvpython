@@ -16,7 +16,7 @@ class vector(object):
     def random():
         return vector(-1.0 + 2.0*random(), -1.0 + 2.0*random(), -1.0 + 2.0*random())
 
-    def __init__(self, *args):
+    def __init__(self, *args, jsObj = None):
         if len(args) == 3:
             self._x = float(args[0]) # make sure it's a float; could be numpy.float64
             self._y = float(args[1])
@@ -28,7 +28,10 @@ class vector(object):
             self._z = other._z
         else:
             raise TypeError('A vector needs 3 components.')
-        self.jsObj = js_vec(self._x, self._y, self._z)
+        if jsObj:
+            self.jsObj = jsObj
+        else:
+            self.jsObj = js_vec(self._x, self._y, self._z)
         self.on_change = self.ignore
 
     def ignore(self):

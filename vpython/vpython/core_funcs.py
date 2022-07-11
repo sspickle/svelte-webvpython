@@ -5,13 +5,15 @@ from .vector import vector as py_vec
 def py2js_vec(v):
     return js_vec(v.x, v.y, v.z)
 
-def js2py_vec(v):
-    return py_vec(v.x, v.y, v.z)
+def js2py_vec(v, jsObj=None):
+    return py_vec(v.x, v.y, v.z, jsObj=jsObj)
 
 class glowProxy(object):
     """
     A proxy for a glowscript library object.
     """
+
+    GP_defaults = {'vecAttrs':[], 'oType':None, 'jsObj':None}
 
     def __init__(self, vecAttrs, oType, factory, *args, **kwargs):
         """
@@ -29,6 +31,7 @@ class glowProxy(object):
         self.jsObj = factory(*args, **kwargs)
 
     def __setattr__(self, name, value):
+        print(f'setting attr {name} of {self} to {value}')
         if name in ['jsObj', 'vecAttrs', 'oType']:
             self.__dict__[name] =  value
         elif name in self.vecAttrs:
@@ -37,10 +40,12 @@ class glowProxy(object):
             setattr(self.jsObj, name, value)
     
     def __getattr__(self, name):
+        print(f'getting attr {name} of {self}')
         if name in ['jsObj', 'vecAttrs', 'oType']:
-            return self.__dict__[name]
+            return self.__dict__.get(name, 
+                glowProxy.GP_defaults.get(name, None))
         elif name in self.vecAttrs:
-            return js2py_vec(getattr(self.jsObj, name))
+            return js2py_vec(getattr(self.jsObj, name), jsObj=getattr(self.jsObj,name))
         else:
             return getattr(self.jsObj, name)
 
