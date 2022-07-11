@@ -1,6 +1,8 @@
 from js import sphere as js_sphere, box as js_box, color, vec as js_vec, rate as async_rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
-from js import label as js_label, scene as js_scene
+from js import label as js_label, scene as js_scene, text as js_text, ellipsoid as js_ellipsoid
+from js import pyramid as js_pyramid, ring as js_ring, text as js_text
+
 from .vector import vector as py_vec
 
 def py2js_vec(v):
@@ -71,5 +73,17 @@ def helix(*args, **kwargs):
 
 def label(*args, **kwargs):
     return glowProxy(['pos', 'color'], 'label', factory=js_label, *args, **kwargs)
+
+def ellipsoid(*args, **kwargs):
+    return glowProxy(['pos', 'color', 'axis'], 'ellipsoid', factory=js_ellipsoid, *args, **kwargs)
+
+def pyramid(*args, **kwargs):
+    return glowProxy(['pos', 'color', 'axis', 'size'], 'pyramid', factory=js_pyramid, *args, **kwargs)
+
+def ring(*args, **kwargs):
+    return glowProxy(['pos', 'color', 'axis'], 'ring', factory=js_ring, *args, **kwargs)
+
+def text(*args, **kwargs):
+    return glowProxy(['pos', 'color', 'axis'], 'text', factory=js_text, *args, **kwargs)
 
 scene = glowProxy(['forward', 'center'], 'scene', jsObj = js_scene)

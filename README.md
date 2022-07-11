@@ -1,6 +1,8 @@
 # WebVPython on Pyodide
 
-This is an embryonic attempt to run WebVPython on Pyodide. 
+This is an embryonic attempt to run WebVPython on Pyodide.
+
+Please use node version 18 or higher.
 
 ## To run locally:
 
