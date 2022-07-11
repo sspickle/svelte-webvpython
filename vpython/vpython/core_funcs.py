@@ -1,3 +1,4 @@
+from xml.dom.domreg import well_known_implementations
 from js import sphere as js_sphere, box as js_box, color, vec as js_vec, rate as async_rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
 from js import label as js_label, scene as js_scene, text as js_text, ellipsoid as js_ellipsoid
@@ -10,6 +11,13 @@ def py2js_vec(v):
 
 def js2py_vec(v, jsObj=None):
     return py_vec(v.x, v.y, v.z, jsObj=jsObj)
+
+def translate_kwargs(kwargs, vecAttrs):
+    # Translate the vecAttrs from kwargs to js vectors.
+    for attr in vecAttrs:
+        if attr in kwargs:
+            kwargs[attr] = py2js_vec(kwargs[attr])
+    return kwargs
 
 class glowProxy(object):
     """
@@ -27,17 +35,16 @@ class glowProxy(object):
         args are the positional arguments for the factory.
         """
         self.vecAttrs = vecAttrs
+        self.funcs = ['rotate']
         self.oType = oType
-        for attr in self.vecAttrs:
-            if attr in kwargs:
-                kwargs[attr] = py2js_vec(kwargs[attr])
+        kwargs = translate_kwargs(kwargs, self.vecAttrs)
         if factory is None:
             self.jsObj = jsObj
         else:
             self.jsObj = factory(*args, **kwargs)
 
     def __setattr__(self, name, value):
-        if name in ['jsObj', 'vecAttrs', 'oType']:
+        if name in ['jsObj', 'vecAttrs', 'oType', 'funcs']:
             self.__dict__[name] =  value
         elif name in self.vecAttrs:
             setattr(self.jsObj, name, py2js_vec(value))
@@ -45,6 +52,7 @@ class glowProxy(object):
             setattr(self.jsObj, name, value)
     
     def __getattr__(self, name):
+        #if name in ['jsObj', 'vecAttrs', 'oType','funcs'] + self.funcs:  # it's tricky with __getattr__. Might want to re-think this...
         if name in ['jsObj', 'vecAttrs', 'oType']:
             return self.__dict__.get(name, 
                 glowProxy.GP_defaults.get(name, None))
@@ -53,11 +61,19 @@ class glowProxy(object):
         else:
             return getattr(self.jsObj, name)
 
+    def rotate(self, *args, **kwargs): # We may need to intercept certain functions and assignements to do js/py vec conversions
+        """
+        Rotate the object.
+        """
+        kwargs = translate_kwargs(kwargs=kwargs, vecAttrs=['axis','origin'])
+        self.jsObj.rotate(*args, **kwargs)
+        return self
+
 def sphere(*args, **kwargs):
     return glowProxy(['pos','color'], 'sphere', factory=js_sphere, *args, **kwargs)
 
 def box(*args, **kwargs):
-    return glowProxy(['pos','color'], 'box', factory=js_box, *args, **kwargs)
+    return glowProxy(['pos','color','size'], 'box', factory=js_box, *args, **kwargs)
 
 def cylinder(*args, **kwargs):
     return glowProxy(['pos', 'axis', 'color'], 'cylinder', factory=js_cylinder, *args, **kwargs)
@@ -75,7 +91,7 @@ def label(*args, **kwargs):
     return glowProxy(['pos', 'color'], 'label', factory=js_label, *args, **kwargs)
 
 def ellipsoid(*args, **kwargs):
-    return glowProxy(['pos', 'color', 'axis'], 'ellipsoid', factory=js_ellipsoid, *args, **kwargs)
+    return glowProxy(['pos', 'color', 'axis', 'size'], 'ellipsoid', factory=js_ellipsoid, *args, **kwargs)
 
 def pyramid(*args, **kwargs):
     return glowProxy(['pos', 'color', 'axis', 'size'], 'pyramid', factory=js_pyramid, *args, **kwargs)

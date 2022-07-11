@@ -17,7 +17,6 @@
 		window.scene = scene;
 
 		stdoutStore.set('');
-		console.log('mounted', scene, pyodide);
 		runMe();
 	});
 
@@ -41,7 +40,7 @@
 	async function runMe() {
 		try {
 			if (pyodide) {
-				let asyncProgram = program.replace('rate(', 'await async_rate(');
+				let asyncProgram = program.split('rate(').join('await async_rate(');
 				await pyodide.loadPackagesFromImports(asyncProgram);
 				var result = await pyodide.runPythonAsync(asyncProgram);
 				stdoutStore.update((value) => (value += result));
