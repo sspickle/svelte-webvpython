@@ -1,4 +1,4 @@
-import{w as r}from"./paths-e19757bb.js";let e=`
+import{w as t}from"./paths-e19757bb.js";let s=`
 from vpython import *
 import numpy as np
 
@@ -13,4 +13,4 @@ while True:
    rate(30)
    r = r*np.exp(1j*0.05)
    s.pos = vec(r.real, r.imag, 0)
-`;const s=r(e);export{s};
+`;const e="code",r=localStorage.getItem(e),a=t(r||s);a.subscribe(o=>{localStorage.setItem(e,o)});export{a as s};
