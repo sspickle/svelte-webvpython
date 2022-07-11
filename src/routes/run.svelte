@@ -15,7 +15,10 @@
 
 		//@ts-ignore
 		window.scene = scene;
-
+		//@ts-ignore
+		window.__reportScriptError = (err) => {
+			redirect_stdout('REPORT ERROR:' + JSON.stringify(err));
+		};
 		stdoutStore.set('');
 		runMe();
 	});
@@ -27,11 +30,9 @@
 
 	srcStore.subscribe((src) => {
 		program = src;
-		console.log('src loaded');
 	});
 
 	stdoutStore.subscribe((text) => {
-		console.log('stdout:', text);
 		if (stdout) {
 			stdout.value = text;
 		}
@@ -43,7 +44,9 @@
 				let asyncProgram = program.split('rate(').join('await async_rate(');
 				await pyodide.loadPackagesFromImports(asyncProgram);
 				var result = await pyodide.runPythonAsync(asyncProgram);
-				stdoutStore.update((value) => (value += result));
+				if (result) {
+					stdoutStore.update((value) => (value += result));
+				}
 			}
 		} catch (err) {
 			console.log('Error:' + err);
