@@ -107,7 +107,7 @@ class glowProxy(object):
         return self
 
 def sphere(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos','color'], oType='sphere', factory=js_sphere, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos','color','size'], oType='sphere', factory=js_sphere, *args, **kwargs)
 
 def box(*args, **kwargs):
     return glowProxy(vecAttrs=['pos','color','size'], oType='box', factory=js_box, *args, **kwargs)
@@ -119,7 +119,7 @@ def arrow(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'axis', 'color'], oType='arrow', factory=js_arrow, *args, **kwargs)
 
 def cone(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color'], oType='cone', factory=js_cone, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos', 'axis', 'color','size'], oType='cone', factory=js_cone, *args, **kwargs)
 
 def helix(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'axis', 'color'], oType='helix', factory=js_helix, *args, **kwargs)
