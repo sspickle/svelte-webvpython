@@ -56,4 +56,4 @@
 <a href="{base}/">Edit this code</a>
 <h2>Running....</h2>
 <div id="glowscript" class="glowscript" />
-<div><textarea bind:this={stdout} rows="20" cols="80" /></div>
+<div><textarea bind:this={stdout} rows="10" cols="80" /></div>
