@@ -31,7 +31,6 @@ class glowProxy(object):
         self.jsObj = factory(*args, **kwargs)
 
     def __setattr__(self, name, value):
-        print(f'setting attr {name} of {self} to {value}')
         if name in ['jsObj', 'vecAttrs', 'oType']:
             self.__dict__[name] =  value
         elif name in self.vecAttrs:
@@ -40,7 +39,6 @@ class glowProxy(object):
             setattr(self.jsObj, name, value)
     
     def __getattr__(self, name):
-        print(f'getting attr {name} of {self}')
         if name in ['jsObj', 'vecAttrs', 'oType']:
             return self.__dict__.get(name, 
                 glowProxy.GP_defaults.get(name, None))
