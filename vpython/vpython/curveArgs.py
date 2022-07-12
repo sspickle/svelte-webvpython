@@ -1,4 +1,7 @@
-from .vector import vector
+try:
+   from .vector import vector
+except:
+   from vector import vector # maybe we're not in a module? for debugging.
 
 """
 Helper functions for the curve constructor/append methods.
@@ -56,23 +59,6 @@ def convert_list_of_vectors_to_dicts(vs, allow_dicts = True):
 
    >>> convert_list_of_vectors_to_dicts([vector(1,2,3), {'pos':vector(4,5,6), 'color':vector(1,2,3), 'radius':0.2}])
    [{'pos': <1, 2, 3>}, {'pos': <4, 5, 6>, 'color': <1, 2, 3>, 'radius': 0.2}]
-
-   >>> getStdForm([vector(1,2,3),vector(3,4,5)])
-   ([{'pos': <1, 2, 3>}, {'pos': <3, 4, 5>}], {})
-
-   >>> getStdForm([vector(1,2,3),vector(3,4,5)], color=vector(1,2,3))
-   ([{'pos': <1, 2, 3>}, {'pos': <3, 4, 5>}], {'color': <1, 2, 3>})
-
-   >>> getStdForm([{'pos':vector(1,2,3),'color':vector(2,3,4)},{'pos':vector(3,4,5),'color':vector(6,7,9)}], color=vector(1,2,3))
-   ([{'pos': <1, 2, 3>, 'color': <2, 3, 4>}, {'pos': <3, 4, 5>, 'color': <6, 7, 9>}], {'color': <1, 2, 3>})
-
-   >>> getStdForm([{'pos':vector(1,2,3),'color':vector(2,3,4)},{'pos':vector(3,4,5),'color':3}], color=vector(1,2,3))
-   Traceback (most recent call last):
-   Exception: color key of dictionary must be a vector
-   
-   >>> getStdForm([{'pos':vector(1,2,3),'color':vector(2,3,4)},{'pos':vector(3,4,5)}], color=vector(1,2,3), radius=0.2)
-   ([{'pos': <1, 2, 3>, 'color': <2, 3, 4>}, {'pos': <3, 4, 5>}], {'color': <1, 2, 3>, 'radius': 0.2})
-
    """
    result = []
    if isinstance(vs, list) or isinstance(vs, tuple):
@@ -104,13 +90,13 @@ def getStdForm(*args, **kwargs):
    returns an updated args list with kwargs as a default dictionary.
 
    >>> getStdForm(vector(1,2,3),vector(3,4,5))
-   ([{'pos': <1, 2, 3>}, {'pos': <3, 4, 5>}], {})
+   [{'pos': <1, 2, 3>}, {'pos': <3, 4, 5>}]
 
    >>> getStdForm(vector(1,2,3),vector(3,4,5), color=vector(1,2,2))
-   ([{'pos': <1, 2, 3>}, {'pos': <3, 4, 5>}], {'color': <1, 2, 2>})
+   [{'color': <1, 2, 2>, 'pos': <1, 2, 3>}, {'color': <1, 2, 2>, 'pos': <3, 4, 5>}]
 
    >>> getStdForm({'pos':[vector(1,2,3),vector(3,4,5)]}, color=vector(1,2,2))
-   ([{'pos': <1, 2, 3>}, {'pos': <3, 4, 5>}], {'color': <1, 2, 2>})
+   [{'color': <1, 2, 2>, 'pos': <1, 2, 3>}, {'color': <1, 2, 2>, 'pos': <3, 4, 5>}]
 
    """
    std_form = convert_list_of_vectors_to_dicts(args)
