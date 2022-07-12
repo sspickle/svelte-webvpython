@@ -6,8 +6,16 @@
 	import { base } from '$app/paths';
 
 	function redirect_stdout(theText: string) {
-		stdoutStore.update((val) => (val += theText + '\n'));
+		if (mounted) {
+			stdoutStore.update((val) => (val += theText + '\n'));
+		}
 	}
+
+	let pyodide: any = null;
+	let program: string;
+	let stdout: HTMLTextAreaElement;
+	let scene: any;
+	let mounted: boolean = false;
 
 	onMount(async () => {
 		scene = await setupGSCanvas();
@@ -20,13 +28,12 @@
 			redirect_stdout('REPORT ERROR:' + JSON.stringify(err));
 		};
 		stdoutStore.set('');
+		mounted = true;
 		runMe();
+		return () => {
+			mounted = false;
+		};
 	});
-
-	let pyodide: any = null;
-	let program: string;
-	let stdout: HTMLTextAreaElement;
-	let scene: any;
 
 	srcStore.subscribe((src) => {
 		program = src;
@@ -34,7 +41,12 @@
 
 	stdoutStore.subscribe((text) => {
 		if (stdout) {
+			if (text.length > 0) {
+				console.log('in stdout update:', text);
+				stdout.removeAttribute('hidden');
+			}
 			stdout.value = text;
+			stdout.scrollTop = stdout.scrollHeight;
 		}
 	});
 
@@ -58,4 +70,4 @@
 <a href="{base}/" target="_self">Edit this code</a>
 <h2>Running....</h2>
 <div id="glowscript" class="glowscript" />
-<div><textarea bind:this={stdout} rows="10" cols="80" /></div>
+<div><textarea bind:this={stdout} rows="10" cols="80" hidden /></div>

@@ -1,22 +1,20 @@
 ## vectors and associated methods
 from math import cos, sin, acos, sqrt, pi
 from random import random
-from js import vec as js_vec
 
 # List of names imported from this module with import *
 __all__ = ['adjust_axis', 'adjust_up', 'comp', 'cross', 'diff_angle', 'dot',
            'hat', 'mag', 'mag2', 'norm', 'object_rotate', 'proj', 'rotate',
            'vector']
 
-
 class vector(object):
-    'vector class'
+    'vector class (no js)'
 
     @staticmethod
     def random():
         return vector(-1.0 + 2.0*random(), -1.0 + 2.0*random(), -1.0 + 2.0*random())
 
-    def __init__(self, *args, jsObj = None):
+    def __init__(self, *args):
         if len(args) == 3:
             self._x = float(args[0]) # make sure it's a float; could be numpy.float64
             self._y = float(args[1])
@@ -28,10 +26,6 @@ class vector(object):
             self._z = other._z
         else:
             raise TypeError('A vector needs 3 components.')
-        if jsObj:
-            self.jsObj = jsObj
-        else:
-            self.jsObj = js_vec(self._x, self._y, self._z)
         self.on_change = self.ignore
 
     def ignore(self):
@@ -102,7 +96,6 @@ class vector(object):
     @x.setter
     def x(self,value):
         self._x = value
-        self.jsObj.x = value
         self.on_change()
 
     @property
@@ -111,7 +104,6 @@ class vector(object):
     @y.setter
     def y(self,value):
         self._y = value
-        self.jsObj.y = value
         self.on_change()
 
     @property
@@ -120,7 +112,6 @@ class vector(object):
     @z.setter
     def z(self,value):
         self._z = value
-        self.jsObj.z = value
         self.on_change()
 
     @property
@@ -132,9 +123,6 @@ class vector(object):
         self._x = value * normA._x
         self._y = value * normA._y
         self._z = value * normA._z
-        self.jsObj.x = self._x
-        self.jsObj.y = self._y
-        self.jsObj.z = self._z
         self.on_change()
 
     @property
@@ -147,9 +135,6 @@ class vector(object):
         self._x = v * normA._x
         self._y = v * normA._y
         self._z = v * normA._z
-        self.jsObj.x = self._x
-        self.jsObj.y = self._y
-        self.jsObj.z = self._z
         self.on_change()
 
     @property
@@ -166,9 +151,6 @@ class vector(object):
         self._x = smg * normA._x
         self._y = smg * normA._y
         self._z = smg * normA._z
-        self.jsObj.x = self._x
-        self.jsObj.y = self._y
-        self.jsObj.z = self._z
         self.on_change()
 
     def norm(self):

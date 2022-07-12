@@ -4,11 +4,13 @@ from js import label as js_label, scene as js_scene, text as js_text, ellipsoid 
 from js import pyramid as js_pyramid, ring as js_ring, text as js_text
 from js import button as js_button, distant_light as js_distant_light, local_light as js_local_light
 from js import slider as js_slider, wtext as js_wtext, radio as js_radio, checkbox as js_checkbox
-from js import menu as js_menu, curve as js_curve
+from js import menu as js_menu, curve as js_curve, Object
 
 from pyodide.ffi import create_proxy, to_js
 
-from .vector import vector
+from .curveArgs import getStdForm
+from .vec_js import vector_js as vector
+
 py_vec = vector
 
 def py2js_vec(v):
@@ -51,7 +53,7 @@ class glowProxy(object):
     GP_defaults = {'vecAttrs':[], 'oType':None, 'jsObj':None, 'listAttrs':[], 'funcAttrs':[]}
     GP_keys = list(GP_defaults.keys())
 
-    def __init__(self, factory=None, jsObj=None, *args, **kwargs):
+    def __init__(self, *args, factory=None, jsObj=None, **kwargs):
         """
         factory is JS function that constructs the jsObj.
         kwArgs are the keyword arguments for the factory.
@@ -173,93 +175,32 @@ class sceneProxy(glowProxy):
     def bind(self, action, py_func):
         self.jsObj.bind(action, create_proxy(py_func))
 
-class curveMethods(object):
+def curveDictToJS(d):
+    """
+    Convert a curve dict with python vectors js vectors.
+    """
+    if 'pos' in d:
+        d['pos'] = py2js_vec(d['pos'])
+    if 'color' in d:
+        d['color'] = py2js_vec(d['color'])
+    return d
 
-    def process_args(self, *args1, **args):
-        c = None
-        r = None
-        vis = None
-        if 'color' in args:
-            c = args['color']
-        if 'radius' in args:
-            r = args['radius']
-        if 'visible' in args:
-            vis = args['visible']
-        if len(args1) > 0:
-            if len(args1) == 1:
-                tpos = self.parse_pos(args1[0])
-            else:  ## avoid nested tuples
-                tlist = list(args1)
-                tpos = self.parse_pos(tlist)
-        elif 'pos' in args:
-            pos = args['pos']
-            tpos = self.parse_pos(pos)  ## resolve pos arguments into a list
-        if len(tpos) == 0:
-            raise AttributeError("To add a point to a curve or points object, specify pos information.")
-        pts = []
-        for pt in tpos:
-            col = c
-            rad = r
-            vi = vis
-            if 'pos' in pt:
-                pt['pos'] = js_vec(pt['pos'])
-            if 'color' in pt:
-                col = js_vec(pt['color'])
-            if 'radius' in pt:
-                rad = pt['radius']
-            if 'visible' in pt:
-                vi = pt['visible']
-            if col is not None:
-                pt['color'] = js_vec(col)
-            if rad is not None:
-                pt['radius'] = rad
-            if vi is not None:
-                pt['visible'] = vi
-            pts.append(pt)
-        return pts
-
-    def parse_pos(self, *vars): # return a list of dictionaries of the form {pos:vec, color:vec ....}
-        # In constructor can have pos=[vec, vec, .....]; no dictionaries
-        ret = []
-        if isinstance(vars, tuple) and len(vars) > 1 :
-            vars = vars[0]
-        if isinstance(vars, tuple) and isinstance(vars[0], list):
-            vars = vars[0]
-
-        for v in vars:
-            if isinstance(v, vector) or isinstance(v, list) or isinstance(v, tuple):
-                if not isinstance(v, vector): # legal in GlowScript: pos=[(x,y,z), (x,y,z)] and pos=[[x,y,z], [x,y,z]]
-                    v = vector(v[0],v[1],v[2])
-                if not self._constructing:
-                    ret.append({'pos':vector(v)}) # make a copy of the vector; it could be (and often is, e.g. in a trail) object.pos
-                else:
-                    ret.append(vector(v))
-            elif isinstance(v, dict) and not self._constructing:
-                ret.append(v)
-            else:
-                if not self._constructing:
-                    raise AttributeError("Point information must be a vector or a dictionary")
-                else:
-                    raise AttributeError("Point pos must be a vector")
-        return ret
-
-    def append(self, *args1, **args):
-        pts, cps = self.process_args(*args1, **args)
-        self.jsObj.append(cps[:])
-
-class curveProxy(glowProxy, curveMethods):
+class curveProxy(glowProxy):
+    """
+    curves are a bit special because there are so many ways to call the constructor.
+    """
     def __init__(self, *args, **kwargs):
-        self.__dict__['_constructing'] = False
-        pts = self.process_args(*args, **kwargs)
-        pts = to_js(({'pos':js_vec(1,1,1)},{'pos':js_vec(2,2,2)}))
-        jsObj = js_curve(pts)
+        std_list = getStdForm(*args, **kwargs)
+        std_list = to_js(list(map(lambda d: curveDictToJS(d), std_list)), dict_converter=Object.fromEntries)
+        super().__init__(oType='curve', jsObj = js_curve(*std_list))
 
     def append(self, *args, **kwargs):
-        self.jsObj.append(*args, **kwargs)
-        return self
+        std_list = getStdForm(*args, **kwargs)
+        std_list = to_js(list(map(lambda d: curveDictToJS(d), std_list)), dict_converter=Object.fromEntries)
+        self.jsObj.append(*std_list)
 
 def curve(*args, **kwargs):
-    return curveProxy(factory=js_curve, *args, **kwargs)
+    return curveProxy(*args, **kwargs)
 
 scene = sceneProxy()
 
