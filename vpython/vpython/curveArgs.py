@@ -114,5 +114,5 @@ def getStdForm(*args, **kwargs):
          else:
             raise Exception('pos must be a vector or list of vectors, or dicts')
       
-   return fill_in_defaults(kwargs, std_form)
+   return fill_in_defaults(kwargs, std_form), kwargs
 

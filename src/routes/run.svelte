@@ -53,7 +53,8 @@
 	async function runMe() {
 		try {
 			if (pyodide) {
-				let asyncProgram = program.split('rate(').join('await async_rate(');
+				let asyncProgram = program.replace(/[^\.\w]rate[\ ]*\(/g, ' await rate('); // replace `rate(` with `async rate(`
+				asyncProgram = asyncProgram.replace(/[^\.\w]text[\ ]*\(/g, ' await text('); // replace `text(` with `async text(`
 				await pyodide.loadPackagesFromImports(asyncProgram);
 				var result = await pyodide.runPythonAsync(asyncProgram);
 				if (result) {

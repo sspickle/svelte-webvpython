@@ -1,3 +1,4 @@
+from os import waitstatus_to_exitcode
 from js import sphere as js_sphere, box as js_box, color, vec as js_vec, rate as async_rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
 from js import label as js_label, scene as js_scene, text as js_text, ellipsoid as js_ellipsoid
@@ -5,6 +6,9 @@ from js import pyramid as js_pyramid, ring as js_ring, text as js_text
 from js import button as js_button, distant_light as js_distant_light, local_light as js_local_light
 from js import slider as js_slider, wtext as js_wtext, radio as js_radio, checkbox as js_checkbox
 from js import menu as js_menu, curve as js_curve, Object
+from js import points as js_points
+from js import window as js_window, fontloading as js_fontloading, waitforfonts as js_waitforfonts
+from js import quad as js_quad, vertex as js_vertex, triangle as js_triangle
 
 from pyodide.ffi import create_proxy, to_js
 
@@ -138,7 +142,10 @@ def pyramid(*args, **kwargs):
 def ring(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'color', 'axis'], oType='ring', factory=js_ring, *args, **kwargs)
 
-def text(*args, **kwargs):
+async def text(*args, **kwargs):
+    if (not hasattr(js_window,'.__font_sans')):
+        js_fontloading()
+    await js_waitforfonts()
     return glowProxy(vecAttrs=['pos', 'color', 'axis'], oType='text', factory=js_text, *args, **kwargs)
 
 def button(*args, **kwargs):
@@ -165,6 +172,48 @@ def distant_light(*args, **kwargs):
 def local_light(*args, **kwargs):
     return glowProxy(vecAttrs=['color','pos'], oType='local_light', factory=js_local_light, *args, **kwargs)
 
+def vertex(*args, **kwargs):
+    return glowProxy(vecAttrs=['pos'], oType='vertex', factory=js_vertex, *args, **kwargs)
+
+class triangleProxy(glowProxy):
+    def __init__(self, *args, **kwargs):
+        if ('v0' in kwargs) and ('v1' in kwargs) and ('v2' in kwargs):
+            vDict = {**kwargs, 'v0':kwargs['v0'].jsObj, 'v1':kwargs['v1'].jsObj, 'v2':kwargs['v2'].jsObj}
+        elif 'vs' in kwargs:
+            vertices = to_js(list(map(lambda v: v.jsObj, kwargs['vs'])))
+            if len(vertices) != 3:
+                raise Exception("triangleProxy: must have exactly 3 vertices")
+            vDict = {**kwargs, 'vs':vertices}
+        else:
+            raise Exception("triangleProxy: must specify v0, v1, v2 or vs")
+        jsObj = js_triangle(**vDict)
+        super().__init__(oType='triangle', jsObj=jsObj)
+
+def triangle(*args, **kwargs):
+    return triangleProxy(*args, **kwargs)
+
+class quadProxy(glowProxy):
+    def __init__(self, *args, **kwargs):
+        if ('v0' in kwargs) and ('v1' in kwargs) and ('v2' in kwargs) and ('v3' in kwargs):
+            vDict = {**kwargs,
+                'v0':kwargs['v0'].jsObj, 
+                'v1':kwargs['v1'].jsObj,
+                'v2':kwargs['v2'].jsObj,
+                'v3':kwargs['v3'].jsObj}
+        elif 'vs' in kwargs:
+            vertices = to_js(list(map(lambda v: v.jsObj, kwargs['vs'])))
+            del kwargs['vs']
+            if len(vertices) != 4:
+                raise Exception("quadProxy: must have exactly 4 vertices")
+            vDict = {**kwargs, 'vs':vertices}
+        else:
+            raise Exception("triangleProxy: must specify v0, v1, v2, v3 or vs")
+        jsObj = js_quad(**vDict)
+        super().__init__(oType='triangle', jsObj=jsObj)
+
+def quad(*args, **kwargs):
+    return quadProxy(*args, **kwargs)
+
 class sceneProxy(glowProxy):
     """
     A proxy for a glowscript scene.
@@ -177,7 +226,7 @@ class sceneProxy(glowProxy):
 
 def curveDictToJS(d):
     """
-    Convert a curve dict with python vectors js vectors.
+    Convert a curve dict with python vectors to js vectors.
     """
     if 'pos' in d:
         d['pos'] = py2js_vec(d['pos'])
@@ -189,18 +238,23 @@ class curveProxy(glowProxy):
     """
     curves are a bit special because there are so many ways to call the constructor.
     """
-    def __init__(self, *args, **kwargs):
-        std_list = getStdForm(*args, **kwargs)
+    def __init__(self, *args, factory = js_curve, oType = 'curve', **kwargs):
+        if not factory:
+            factory = js_curve
+        std_list, std_kwargs = getStdForm(*args, **kwargs)
         std_list = to_js(list(map(lambda d: curveDictToJS(d), std_list)), dict_converter=Object.fromEntries)
-        super().__init__(oType='curve', jsObj = js_curve(*std_list))
+        super().__init__(oType='curve', jsObj = factory(*std_list, **std_kwargs))
 
     def append(self, *args, **kwargs):
-        std_list = getStdForm(*args, **kwargs)
+        std_list,std_kwargs = getStdForm(*args, **kwargs)
         std_list = to_js(list(map(lambda d: curveDictToJS(d), std_list)), dict_converter=Object.fromEntries)
-        self.jsObj.append(*std_list)
+        self.jsObj.append(*std_list, **std_kwargs)
 
 def curve(*args, **kwargs):
     return curveProxy(*args, **kwargs)
+
+def points(*args, **kwargs):
+    return curveProxy(*args, oType='points', factory=js_points, **kwargs)
 
 scene = sceneProxy()
 
