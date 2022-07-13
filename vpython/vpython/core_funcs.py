@@ -119,7 +119,7 @@ def box(*args, **kwargs):
     return glowProxy(vecAttrs=['pos','color','size'], oType='box', factory=js_box, *args, **kwargs)
 
 def cylinder(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color'], oType='cylinder', factory=js_cylinder, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos', 'axis', 'color','size'], oType='cylinder', factory=js_cylinder, *args, **kwargs)
 
 def arrow(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'axis', 'color'], oType='arrow', factory=js_arrow, *args, **kwargs)
