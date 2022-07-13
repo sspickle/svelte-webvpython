@@ -1,4 +1,3 @@
-from os import waitstatus_to_exitcode
 from js import sphere as js_sphere, box as js_box, color, shapes, paths, vec as js_vec, rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
 from js import label as js_label, scene as js_scene, text as js_text, ellipsoid as js_ellipsoid
@@ -9,6 +8,7 @@ from js import menu as js_menu, curve as js_curve, Object
 from js import points as js_points, extrusion as js_extrusion
 from js import window as js_window, fontloading as js_fontloading, waitforfonts as js_waitforfonts
 from js import quad as js_quad, vertex as js_vertex, triangle as js_triangle
+from js import canvas as js_canvas
 
 from pyodide.ffi import create_proxy, to_js
 
@@ -260,4 +260,8 @@ def points(*args, **kwargs):
     return curveProxy(*args, oType='points', factory=js_points, **kwargs)
 
 scene = sceneProxy()
+
+def canvas(*args, **kwargs):
+    return glowProxy(vecAttrs = ['forward', 'center', 'background'], listAttrs=['lights'], oType='canvas', factory=js_canvas, *args, **kwargs)
+
 
