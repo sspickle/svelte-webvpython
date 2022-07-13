@@ -81,12 +81,12 @@ class vector(object):
         return NotImplemented
 
     def __eq__(self,other):
-        if type(self) is vector and isinstance(other, vector):
+        if isinstance(self, vector) and isinstance(other, vector):
             return self.equals(other)
         return False
 
     def __ne__(self,other):
-        if type(self) is vector and isinstance(other, vector):
+        if isinstance(self, vector) and isinstance(other, vector):
             return not self.equals(other)
         return True
 
