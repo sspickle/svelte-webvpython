@@ -1,5 +1,5 @@
 from os import waitstatus_to_exitcode
-from js import sphere as js_sphere, box as js_box, color, shapes, paths, vec as js_vec, rate as async_rate
+from js import sphere as js_sphere, box as js_box, color, shapes, paths, vec as js_vec, rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
 from js import label as js_label, scene as js_scene, text as js_text, ellipsoid as js_ellipsoid
 from js import pyramid as js_pyramid, ring as js_ring, text as js_text
