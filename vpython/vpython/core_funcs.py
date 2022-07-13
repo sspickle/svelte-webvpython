@@ -1,12 +1,12 @@
 from os import waitstatus_to_exitcode
-from js import sphere as js_sphere, box as js_box, color, vec as js_vec, rate as async_rate
+from js import sphere as js_sphere, box as js_box, color, shapes, paths, vec as js_vec, rate as async_rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
 from js import label as js_label, scene as js_scene, text as js_text, ellipsoid as js_ellipsoid
 from js import pyramid as js_pyramid, ring as js_ring, text as js_text
 from js import button as js_button, distant_light as js_distant_light, local_light as js_local_light
 from js import slider as js_slider, wtext as js_wtext, radio as js_radio, checkbox as js_checkbox
 from js import menu as js_menu, curve as js_curve, Object
-from js import points as js_points
+from js import points as js_points, extrusion as js_extrusion
 from js import window as js_window, fontloading as js_fontloading, waitforfonts as js_waitforfonts
 from js import quad as js_quad, vertex as js_vertex, triangle as js_triangle
 
@@ -174,6 +174,9 @@ def local_light(*args, **kwargs):
 
 def vertex(*args, **kwargs):
     return glowProxy(vecAttrs=['pos'], oType='vertex', factory=js_vertex, *args, **kwargs)
+
+def extrusion(*args, **kwargs):
+    return glowProxy(vecAttrs=['pos', 'axis', 'color','up'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
 
 class triangleProxy(glowProxy):
     def __init__(self, *args, **kwargs):
