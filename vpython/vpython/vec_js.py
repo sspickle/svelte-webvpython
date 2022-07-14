@@ -5,7 +5,7 @@ from .vector import *
 __all__ = ['vector_js']
 
 class vector_js(vector):
-    'vector class with jsObj tracking'
+    'python vector class with internal jsObj tracking'
 
     def __init__(self, *args, jsObj = None):
         super().__init__(*args)

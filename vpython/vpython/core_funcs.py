@@ -1,6 +1,6 @@
 from js import sphere as js_sphere, box as js_box, color, shapes, paths, vec as js_vec, rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
-from js import label as js_label, scene as js_scene, text as js_text, ellipsoid as js_ellipsoid
+from js import label as js_label, scene as js_scene, textures
 from js import pyramid as js_pyramid, ring as js_ring, text as js_text
 from js import button as js_button, distant_light as js_distant_light, local_light as js_local_light
 from js import slider as js_slider, wtext as js_wtext, radio as js_radio, checkbox as js_checkbox
@@ -8,20 +8,24 @@ from js import menu as js_menu, curve as js_curve, Object
 from js import points as js_points, extrusion as js_extrusion
 from js import window as js_window, fontloading as js_fontloading, waitforfonts as js_waitforfonts
 from js import quad as js_quad, vertex as js_vertex, triangle as js_triangle
-from js import canvas as js_canvas
+from js import canvas as js_canvas, attach_light as attach_light_js
 
 from pyodide.ffi import create_proxy, to_js
 
 from .curveArgs import getStdForm
 from .vec_js import vector_js as vector
 
-py_vec = vector
+from .vec_conversion import js2py_vec, py2js_vec
+from .shapes_piodide import convertPyVecsToJSList
 
-def py2js_vec(v):
-    return js_vec(v.x, v.y, v.z)
-
-def js2py_vec(v, jsObj=None):
-    return py_vec(v.x, v.y, v.z, jsObj=jsObj)
+def translate_kwargs_nest(kwargs, nestAttrs):
+    """
+    Handle nested structures of lists of vectors.
+    """
+    for attr in nestAttrs:
+        if attr in kwargs:
+            kwargs[attr] = convertPyVecsToJSList(kwargs[attr])
+    return kwargs
 
 def translate_kwargs_vecs(kwargs, vecAttrs):
     # Translate the vecAttrs from kwargs to js vectors.
@@ -54,7 +58,7 @@ class glowProxy(object):
     GP_keys are the names of attributes stored in self.__dict__, not proxied from jsObj.
     """
 
-    GP_defaults = {'vecAttrs':[], 'oType':None, 'jsObj':None, 'listAttrs':[], 'funcAttrs':[]}
+    GP_defaults = {'vecAttrs':[], 'oType':None, 'jsObj':None, 'listAttrs':[], 'funcAttrs':[], 'nestAttrs':[]}
     GP_keys = list(GP_defaults.keys())
 
     def __init__(self, *args, factory=None, jsObj=None, **kwargs):
@@ -69,6 +73,8 @@ class glowProxy(object):
         kwargs = translate_kwargs_vecs(kwargs, self.vecAttrs)
         kwargs = translate_kwargs_lists(kwargs, self.listAttrs)
         kwargs = translate_kwargs_funcs(kwargs, self.funcAttrs)
+        kwargs = translate_kwargs_nest(kwargs, self.nestAttrs)
+
         if factory is None:
             self.jsObj = jsObj
         else:
@@ -116,7 +122,7 @@ def sphere(*args, **kwargs):
     return glowProxy(vecAttrs=['pos','color','size','trail_color'], oType='sphere', factory=js_sphere, *args, **kwargs)
 
 def box(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos','color','size'], oType='box', factory=js_box, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos','color','size','axis'], oType='box', factory=js_box, *args, **kwargs)
 
 def cylinder(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'axis', 'color','size'], oType='cylinder', factory=js_cylinder, *args, **kwargs)
@@ -176,7 +182,7 @@ def vertex(*args, **kwargs):
     return glowProxy(vecAttrs=['pos'], oType='vertex', factory=js_vertex, *args, **kwargs)
 
 def extrusion(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color','up'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos', 'axis', 'color','up', 'start_face_color','end_face_color'], nestAttrs=['shape','path'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
 
 class triangleProxy(glowProxy):
     def __init__(self, *args, **kwargs):
@@ -265,3 +271,9 @@ def canvas(*args, **kwargs):
     return glowProxy(vecAttrs = ['forward', 'center', 'background'], listAttrs=['lights'], oType='canvas', factory=js_canvas, *args, **kwargs)
 
 
+def attach_light(*args, **kwargs):
+    if (len(args) != 1):
+        raise Exception("attach_light: must have exactly 1 unnamed argument")
+    elif (not isinstance(args[0], glowProxy)):
+        raise Exception("attach_light: must have a glowProxy as the unnamed argument")
+    return glowProxy(vecAttrs=['offset','color'], oType='attach_light', factory=attach_light_js, *(args[0].jsObj,), **kwargs)

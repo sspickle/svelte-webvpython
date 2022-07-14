@@ -5,7 +5,7 @@ from random import random
 # List of names imported from this module with import *
 __all__ = ['adjust_axis', 'adjust_up', 'comp', 'cross', 'diff_angle', 'dot',
            'hat', 'mag', 'mag2', 'norm', 'object_rotate', 'proj', 'rotate',
-           'vector']
+           'vector', 'vec']
 
 class vector(object):
     'vector class (no js)'
@@ -34,14 +34,13 @@ class vector(object):
     @property
     def value(self):
         return [self._x, self._y, self._z]
+    
     @value.setter
     def value(self,other):  ## ensures a copy; other is a vector
         self._x = other._x
         self._y = other._y
         self._z = other._z
-        self.jsObj.x = other._x
-        self.jsObj.y = other._y
-        self.jsObj.z = other._z
+        self.on_change()
 
     def __neg__(self):
         return vector(-self._x, -self._y, -self._z)
@@ -236,6 +235,8 @@ class vector(object):
         self._x = m11*sx + m12*sy + m13*sz
         self._y = m21*sx + m22*sy + m23*sz
         self._z = m31*sx + m32*sy + m33*sz
+
+vec = vector
 
 def object_rotate(objaxis, objup, angle, axis):
     u = axis.hat
