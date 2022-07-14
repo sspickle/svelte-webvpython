@@ -1,4 +1,8 @@
 from .vec_js import vector_js as vector
+import colorsys
+
+def list_to_vec(L):
+    return vector(L[0], L[1], L[2])
 
 class color(object):
     black = vector(0,0,0)
