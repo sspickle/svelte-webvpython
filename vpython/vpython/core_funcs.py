@@ -159,7 +159,7 @@ def pyramid(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'color', 'axis', 'size'], oType='pyramid', factory=js_pyramid, *args, **kwargs)
 
 def ring(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'color', 'axis'], oType='ring', factory=js_ring, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos', 'color', 'axis', 'size'], oType='ring', factory=js_ring, *args, **kwargs)
 
 async def text(*args, **kwargs):
     if (not hasattr(js_window,'.__font_sans')):
@@ -192,7 +192,7 @@ def local_light(*args, **kwargs):
     return glowProxy(vecAttrs=['color','pos'], oType='local_light', factory=js_local_light, *args, **kwargs)
 
 def vertex(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos'], oType='vertex', factory=js_vertex, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos','color'], oType='vertex', factory=js_vertex, *args, **kwargs)
 
 def extrusion(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'axis', 'color','up', 'start_face_color','end_face_color'], nestAttrs=['shape','path'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
