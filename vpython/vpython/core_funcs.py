@@ -9,6 +9,7 @@ from js import points as js_points, extrusion as js_extrusion
 from js import window as js_window, fontloading as js_fontloading, waitforfonts as js_waitforfonts
 from js import quad as js_quad, vertex as js_vertex, triangle as js_triangle, ellipsoid as js_ellipsoid
 from js import canvas as js_canvas, attach_light as js_attach_light, compound as js_compound
+from js import graph as js_graph, gcurve as js_gcurve, gvbars as js_gvbars, gdots as js_gdots
 
 from pyodide.ffi import create_proxy, to_js
 
@@ -92,7 +93,7 @@ class glowProxy(object):
         elif name in self.listAttrs:
             setattr(self.jsObj, name, to_js(value))
         else:
-            setattr(self.jsObj, name, value)
+            setattr(self.jsObj, name, to_js(value, dict_converter=Object.fromEntries))
     
     def __getattr__(self, name):
         if name in glowProxy.GP_keys:
@@ -196,6 +197,18 @@ def vertex(*args, **kwargs):
 
 def extrusion(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'axis', 'color','up', 'start_face_color','end_face_color'], nestAttrs=['shape','path'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
+
+def graph(*args, **kwargs):
+    return glowProxy(oType='graph', factory=js_graph, *args, **kwargs)
+
+def gcurve(*args, **kwargs):
+    return glowProxy(oType='gcurve', vecAttrs=['color','marker_color'], factory=js_gcurve, *args, **kwargs)
+
+def gvbars(*args, **kwargs):
+    return glowProxy(oType='gvbars', vecAttrs=['color','marker_color'], factory=js_gvbars, *args, **kwargs)
+
+def gdots(*args, **kwargs):
+    return glowProxy(oType='gdots', vecAttrs=['color','marker_color'], factory=js_gdots, *args, **kwargs)
 
 class triangleProxy(glowProxy):
     def __init__(self, *args, **kwargs):

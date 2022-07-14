@@ -37,7 +37,8 @@
 		Monaco = await import('monaco-editor');
 		editor = Monaco.editor.create(<HTMLElement>divEl, {
 			value: $srcStore,
-			language: 'python'
+			language: 'python',
+			fixedOverflowWidgets: true
 		});
 
 		editor.onDidChangeModelContent(() => {
@@ -51,11 +52,25 @@
 </script>
 
 <a href="{base}/run">Run this program</a>
-<div class="editor" bind:this={divEl} />
+<div class="remainder">
+	<div class="editor" id="editor" bind:this={divEl} />
+</div>
 
 <style>
-	.editor {
-		width: 100vw;
+	.remainder {
+		display: flex;
+		flex-direction: column;
 		height: 100vh;
+		margin: 0;
+	}
+
+	.remainder #editor {
+		flex-grow: 1;
+	}
+
+	.editor {
+		overflow: auto;
+		max-width: 100%;
+		max-height: 100%;
 	}
 </style>
