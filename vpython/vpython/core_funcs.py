@@ -202,7 +202,7 @@ def vertex(*args, **kwargs):
     return glowProxy(vecAttrs=['pos','color','normal'], oType='vertex', factory=js_vertex, *args, **kwargs)
 
 def extrusion(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color','up', 'start_face_color','end_face_color'], nestAttrs=['shape','path'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos', 'axis', 'up', 'color', 'start_face_color','end_face_color'], nestAttrs=['shape','path'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
 
 def graph(*args, **kwargs):
     return glowProxy(oType='graph', factory=js_graph, *args, **kwargs)
