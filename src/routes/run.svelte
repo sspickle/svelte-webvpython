@@ -3,12 +3,18 @@
 	import { srcStore } from '../stores/codeSrc';
 	import { prefsStore } from '../stores/prefs';
 	import { onMount } from 'svelte';
-	import { setupGSCanvas, loadPiodide } from '../utils/utils';
+	import { setupGSCanvas, getPyodide } from '../utils/utils';
 	import { base } from '$app/paths';
 
 	function redirect_stdout(theText: string) {
 		if (mounted) {
 			stdoutStore.update((val) => (val += theText + '\n'));
+		}
+	}
+
+	function redirect_stderr(theText: string) {
+		if (mounted) {
+			stdoutStore.update((val) => (val += 'stderr:' + theText + '\n'));
 		}
 	}
 
@@ -18,6 +24,7 @@
 	let scene: any;
 	let mounted: boolean = false;
 	let applyDefaultImports: boolean = $prefsStore.add_default_imports;
+	let pyodideURL = 'https://cdn.jsdelivr.net/pyodide/v0.21.0a3/full/'; //'https://cdn.jsdelivr.net/pyodide/v0.21.0a3/full/',
 
 	let defaultImportCode = `from math import *
 from numpy import arange
@@ -26,21 +33,29 @@ from vpython import *
 `;
 
 	onMount(async () => {
-		scene = await setupGSCanvas();
-		pyodide = await loadPiodide(redirect_stdout);
+		try {
+			scene = await setupGSCanvas();
+			pyodide = await getPyodide(redirect_stdout, redirect_stderr, pyodideURL);
+		} catch (e) {
+			redirect_stderr(JSON.stringify(e));
+		}
 
-		//@ts-ignore
-		window.scene = scene;
-		//@ts-ignore
-		window.__reportScriptError = (err) => {
-			redirect_stdout('REPORT ERROR:' + JSON.stringify(err));
-		};
-		stdoutStore.set('');
-		mounted = true;
-		runMe();
-		return () => {
-			mounted = false;
-		};
+		if (pyodide) {
+			//@ts-ignore
+			window.scene = scene;
+			//@ts-ignore
+			window.__reportScriptError = (err) => {
+				redirect_stderr(JSON.stringify(err));
+			};
+			stdoutStore.set('');
+			mounted = true;
+			runMe();
+			return () => {
+				mounted = false;
+			};
+		} else {
+			redirect_stderr('Pyodide not found');
+		}
 	});
 
 	srcStore.subscribe((src) => {
@@ -49,8 +64,7 @@ from vpython import *
 
 	stdoutStore.subscribe((text) => {
 		if (stdout) {
-			if (text.length > 0) {
-				console.log('in stdout update:', text);
+			if (text.length > 0 && stdout.hasAttribute('hidden')) {
 				stdout.removeAttribute('hidden');
 			}
 			stdout.value = text;

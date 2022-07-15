@@ -79,11 +79,7 @@ class glowProxy(object):
         for attr in glowProxy.GP_keys:
             self.__dict__[attr] = kwargs.get(attr, glowProxy.GP_defaults.get(attr, None)) # grab kwargs for GP_keys
 
-        kwargs = translate_kwargs_vecs(kwargs, self.vecAttrs)
-        kwargs = translate_kwargs_lists(kwargs, self.listAttrs)
-        kwargs = translate_kwargs_funcs(kwargs, self.funcAttrs)
-        kwargs = translate_kwargs_nest(kwargs, self.nestAttrs)
-        kwargs = translate_kwargs_rest(kwargs, self.vecAttrs + self.listAttrs + self.funcAttrs + self.nestAttrs)
+        kwargs = self.translate_all_kwargs(kwargs)
 
         for attr in glowProxy.GP_keys:
             if attr in kwargs:
@@ -93,6 +89,19 @@ class glowProxy(object):
             self.jsObj = jsObj
         else:
             self.jsObj = factory(*args, **kwargs)
+            print("setting __pytype__ to", self.oType)
+            setattr(self.jsObj, '__pytype__', self.oType)
+
+    def translate_all_kwargs(self, kwargs):
+        """
+        Convert kwargs to save js objects.
+        """
+        kwargs = translate_kwargs_vecs(kwargs, self.vecAttrs)
+        kwargs = translate_kwargs_lists(kwargs, self.listAttrs)
+        kwargs = translate_kwargs_funcs(kwargs, self.funcAttrs)
+        kwargs = translate_kwargs_nest(kwargs, self.nestAttrs)
+        kwargs = translate_kwargs_rest(kwargs, self.vecAttrs + self.listAttrs + self.funcAttrs + self.nestAttrs)
+        return kwargs
 
     def __setattr__(self, name, value):
         if name in glowProxy.GP_keys:
@@ -130,6 +139,14 @@ class glowProxy(object):
         """
         kwargs = translate_kwargs_vecs(kwargs=kwargs, vecAttrs=['origin'])
         self.jsObj.append(*args, **kwargs)
+        return self
+
+    def modify(self, *args, **kwargs):
+        """
+        Modify the object.
+        """
+        kwargs = self.translate_all_kwargs(kwargs)
+        self.jsObj.modify(*args, **kwargs)
         return self
     
     def clone(self, *args, **kwargs):
@@ -265,11 +282,17 @@ class canvasProxy(glowProxy):
         super().__init__(vecAttrs = ['forward', 'center', 'background', 'ambient','up'], listAttrs=['lights'], oType='canvas', jsObj = jsObj, factory=factory, **kwargs)
 
     def bind(self, action, py_func):
+        print("canvasProxy.bind: action =", action, py_func)
         self.jsObj.bind(action, create_proxy(py_func))
 
     @property
     def camera(self):
         return cameraProxy(jsObj=self.jsObj.camera)
+
+    @property
+    def mouse(self):
+        print("in mouse getter")
+        return mouseProxy(jsObj=self.jsObj.mouse)
 
 scene = canvasProxy(jsObj=js_scene)
 
@@ -335,3 +358,23 @@ class cameraProxy(glowProxy):
         if not jsObj:
             raise Exception("must specify a camera as a jsObj")
         super().__init__(vecAttrs=['pos','axis'], oType='camera', jsObj=jsObj)
+
+class mouseProxy(glowProxy):
+    def __init__(self, *args, jsObj=None):
+        print("mouseProxy.__init__: args =", jsObj)
+        if not jsObj:
+            raise Exception("must specify a mouse as a jsObj")
+        super().__init__(vecAttrs=['pos'], oType='mouse', jsObj=jsObj)
+
+    @property
+    def pick(self):
+        print("in mouse pick getter")
+        if self.jsObj.pick:
+            result = getattr(self.jsObj.pick,'__pytype__',None)
+            if result:
+                print("got result type:", result, type(result))
+            else:
+                print("pick but no pytype")
+        else:
+            print("no pick")
+        return self.jsObj.pick

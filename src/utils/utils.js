@@ -1,17 +1,25 @@
-export const loadPiodide = async (stdRedir) => {
+export const getPyodide = async (stdOutRedir, stdErrRedir, url) => {
 	console.log('loading prep');
 	const pkgResponse = fetch('vpython.zip').then((x) => x.arrayBuffer());
+	console.log(stdErrRedir, stdOutRedir);
+	let pyodide;
+	try {
+		pyodide = await loadPyodide({
+			indexURL: url,
+			stdout: stdOutRedir ? stdOutRedir : null,
+			stderr: stdErrRedir ? stdErrRedir : null
+		});
+	} catch (e) {
+		console.log(e);
+		throw e;
+	}
 
-	let pyodide = await loadPyodide({
-		indexURL: 'https://cdn.jsdelivr.net/pyodide/dev/full/',
-		stdout: stdRedir ? stdRedir : null,
-		stderr: stdRedir ? stdRedir : null
-	});
-
-	const pkgdata = await pkgResponse;
-	console.log('Unpacking package');
-	pyodide.unpackArchive(pkgdata, 'zip');
-	console.log('Importing vpython package');
+	if (pyodide) {
+		const pkgdata = await pkgResponse;
+		console.log('Unpacking package');
+		pyodide.unpackArchive(pkgdata, 'zip');
+		console.log('Importing vpython package');
+	}
 
 	return pyodide;
 };
