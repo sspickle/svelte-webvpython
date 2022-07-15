@@ -7,12 +7,18 @@
 	import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 	import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 	import { srcStore } from '../stores/codeSrc.js';
+	import { prefsStore } from '../stores/prefs.js';
 	import { base } from '$app/paths';
 
 	// @ts-ignore
 	let divEl: HTMLDivElement | null = null;
 	let editor: monaco.editor.IStandaloneCodeEditor;
 	let Monaco;
+
+	let toggleDefaultImports = () => {
+		let newUseDefaults = !$prefsStore.add_default_imports;
+		prefsStore.set({ add_default_imports: newUseDefaults });
+	};
 
 	onMount(async () => {
 		// @ts-ignore
@@ -52,6 +58,15 @@
 </script>
 
 <a href="{base}/run">Run this program</a>
+<input
+	type="checkbox"
+	name="default includes"
+	checked={$prefsStore.add_default_imports}
+	on:change={() => {
+		toggleDefaultImports();
+	}}
+/>
+Apply Default Imports
 <div class="remainder">
 	<div class="editor" id="editor" bind:this={divEl} />
 </div>

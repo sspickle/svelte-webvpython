@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { stdoutStore } from '../stores/stdoutSrc';
 	import { srcStore } from '../stores/codeSrc';
+	import { prefsStore } from '../stores/prefs';
 	import { onMount } from 'svelte';
 	import { setupGSCanvas, loadPiodide } from '../utils/utils';
 	import { base } from '$app/paths';
@@ -16,6 +17,13 @@
 	let stdout: HTMLTextAreaElement;
 	let scene: any;
 	let mounted: boolean = false;
+	let applyDefaultImports: boolean = $prefsStore.add_default_imports;
+
+	let defaultImportCode = `from math import *
+from numpy import arange
+from random import random
+from vpython import *
+`;
 
 	onMount(async () => {
 		scene = await setupGSCanvas();
@@ -55,8 +63,12 @@
 			if (pyodide) {
 				let asyncProgram = program.replace(/[^\.\w\n]rate[\ ]*\(/g, ' await rate('); // replace ` rate(` with `async async_rate(`
 				asyncProgram = asyncProgram.replace(/\n]rate[\ ]*\(/g, '\n await rate('); // replace '\nrate(` with `\nasync async_rate(`
-				let found = asyncProgram.match(/[^\.\w]text[\ ]*\(/);
-				if (found) {
+				if (applyDefaultImports) {
+					asyncProgram = defaultImportCode + '\n' + asyncProgram;
+				}
+				console.log(asyncProgram);
+				let foundTextConstructor = asyncProgram.match(/[^\.\w]text[\ ]*\(/);
+				if (foundTextConstructor) {
 					//@ts-ignore
 					window.fontloading();
 					//@ts-ignore
