@@ -19,6 +19,9 @@ from .vec_js import vector_js as vector
 from .vec_conversion import js2py_vec, py2js_vec
 from .shapes_piodide import convertPyVecsToJSList
 
+gsObjs = {}
+gsCntr = 0
+
 def translate_kwargs_rest(kwargs, notAttrs):
     # Handle everything else
     for attr in kwargs:

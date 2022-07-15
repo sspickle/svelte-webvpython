@@ -12,7 +12,7 @@
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
 		"format": "prettier --write --plugin-search-dir=. .",
-		"zip": "cd vpython && zip -r ../static/vpython.zip vpython && cd .."
+		"zip": "zip -r ./static/vpython.zip vpython"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.22.2",
