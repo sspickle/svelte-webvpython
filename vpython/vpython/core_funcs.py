@@ -260,7 +260,7 @@ class sceneProxy(glowProxy):
     A proxy for a glowscript scene.
     """
     def __init__(self, *args, **kwargs):
-        super().__init__(vecAttrs = ['forward', 'center', 'background'], listAttrs=['lights'], oType='scene', jsObj = js_scene)
+        super().__init__(vecAttrs = ['forward', 'center', 'background', 'ambient'], listAttrs=['lights'], oType='scene', jsObj = js_scene)
 
     def bind(self, action, py_func):
         self.jsObj.bind(action, create_proxy(py_func))

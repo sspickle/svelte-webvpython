@@ -64,9 +64,9 @@ from vpython import *
 				let asyncProgram = program.replace(/[^\.\w\n]rate[\ ]*\(/g, ' await rate('); // replace ` rate(` with `async async_rate(`
 				asyncProgram = asyncProgram.replace(/\n]rate[\ ]*\(/g, '\n await rate('); // replace '\nrate(` with `\nasync async_rate(`
 				if (applyDefaultImports) {
-					asyncProgram = defaultImportCode + '\n' + asyncProgram;
+					await pyodide.loadPackagesFromImports(defaultImportCode);
+					var result = await pyodide.runPythonAsync(defaultImportCode);
 				}
-				console.log(asyncProgram);
 				let foundTextConstructor = asyncProgram.match(/[^\.\w]text[\ ]*\(/);
 				if (foundTextConstructor) {
 					//@ts-ignore
