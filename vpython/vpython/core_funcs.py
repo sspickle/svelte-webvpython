@@ -89,8 +89,7 @@ class glowProxy(object):
             self.jsObj = jsObj
         else:
             self.jsObj = factory(*args, **kwargs)
-            print("setting __pytype__ to", self.oType)
-            setattr(self.jsObj, '__pytype__', self.oType)
+            setattr(self.jsObj, '__pytype__', self.oType) # this doesn't seem to work :(
 
     def translate_all_kwargs(self, kwargs):
         """
