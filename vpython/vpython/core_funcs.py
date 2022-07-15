@@ -19,6 +19,14 @@ from .vec_js import vector_js as vector
 from .vec_conversion import js2py_vec, py2js_vec
 from .shapes_piodide import convertPyVecsToJSList
 
+def translate_kwargs_rest(kwargs, notAttrs):
+    # Handle everything else
+    for attr in kwargs:
+        if attr not in notAttrs:
+            kwargs[attr] = to_js(kwargs[attr], dict_converter=Object.fromEntries)
+
+    return kwargs
+
 def translate_kwargs_nest(kwargs, nestAttrs):
     """
     Handle nested structures of lists of vectors.
@@ -75,6 +83,7 @@ class glowProxy(object):
         kwargs = translate_kwargs_lists(kwargs, self.listAttrs)
         kwargs = translate_kwargs_funcs(kwargs, self.funcAttrs)
         kwargs = translate_kwargs_nest(kwargs, self.nestAttrs)
+        kwargs = translate_kwargs_rest(kwargs, self.vecAttrs + self.listAttrs + self.funcAttrs + self.nestAttrs)
 
         for attr in glowProxy.GP_keys:
             if attr in kwargs:
@@ -162,10 +171,7 @@ def pyramid(*args, **kwargs):
 def ring(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'color', 'axis', 'size'], oType='ring', factory=js_ring, *args, **kwargs)
 
-async def text(*args, **kwargs):
-    if (not hasattr(js_window,'.__font_sans')):
-        js_fontloading()
-    await js_waitforfonts()
+def text(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'color', 'axis'], oType='text', factory=js_text, *args, **kwargs)
 
 def button(*args, **kwargs):
@@ -193,7 +199,7 @@ def local_light(*args, **kwargs):
     return glowProxy(vecAttrs=['color','pos'], oType='local_light', factory=js_local_light, *args, **kwargs)
 
 def vertex(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos','color'], oType='vertex', factory=js_vertex, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos','color','normal'], oType='vertex', factory=js_vertex, *args, **kwargs)
 
 def extrusion(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'axis', 'color','up', 'start_face_color','end_face_color'], nestAttrs=['shape','path'], oType='extrusion', factory=js_extrusion, *args, **kwargs)

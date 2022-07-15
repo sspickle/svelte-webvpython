@@ -55,7 +55,13 @@
 			if (pyodide) {
 				let asyncProgram = program.replace(/[^\.\w\n]rate[\ ]*\(/g, ' await rate('); // replace ` rate(` with `async async_rate(`
 				asyncProgram = asyncProgram.replace(/\n]rate[\ ]*\(/g, '\n await rate('); // replace '\nrate(` with `\nasync async_rate(`
-				asyncProgram = asyncProgram.replace(/[^\.\w]text[\ ]*\(/g, 'await text('); // replace `text(` with `async text(`
+				let found = asyncProgram.match(/[^\.\w]text[\ ]*\(/);
+				if (found) {
+					//@ts-ignore
+					window.fontloading();
+					//@ts-ignore
+					await window.waitforfonts();
+				}
 				await pyodide.loadPackagesFromImports(asyncProgram);
 				var result = await pyodide.runPythonAsync(asyncProgram);
 				if (result) {

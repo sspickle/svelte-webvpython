@@ -7,7 +7,7 @@ from .shapespaths_orig import *
 from .vector import adjust_axis, adjust_up, comp, cross, diff_angle, dot, hat, mag, mag2, norm, object_rotate, proj, rotate
 from .vec_js import vector_js as vector
 from .color import color
-from js import textures
+from js import textures, bumpmaps
 
 vec = vector
 py_vec = vector
@@ -18,4 +18,4 @@ __all__ = ["sphere", "box", "color", "vec", "py_vec", "js_vec", "vector", "rate"
 'ellipsoid', 'pyramid', 'ring', 'text', 'textures', 'attach_light', 'local_light','button',
 'slider', 'wtext', 'radio', 'checkbox', 'menu', 'curve', 'points','vertex', 'triangle','quad',
 'extrusion', 'paths','shapes', 'canvas','textures', 'compound','color',
-'graph', 'gcurve', 'gvbars', 'gdots']
+'graph', 'gcurve', 'gvbars', 'gdots','bumpmaps']
