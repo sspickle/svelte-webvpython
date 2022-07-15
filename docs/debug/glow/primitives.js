@@ -654,7 +654,9 @@
 		}
 	})
     
-    function box(args) { return initObject(this, box, args) }
+    function box(args) { 
+        return initObject(this, box, args) 
+    }
     subclass(box, Primitive)
     box.prototype.__hasPosAtCenter = true
     property.declare( box.prototype, {
