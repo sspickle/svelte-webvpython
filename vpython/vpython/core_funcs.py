@@ -133,6 +133,8 @@ class glowProxy(object):
         return self
     
     def clone(self, *args, **kwargs):
+        if 'pos' in kwargs:
+            kwargs['pos'] = py2js_vec(kwargs['pos'])
         cjs = self.jsObj.clone(*args, **kwargs)
         for attr in glowProxy.GP_defaults:
             kwAdd = {}
@@ -157,7 +159,7 @@ def cone(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'axis', 'color','size'], oType='cone', factory=js_cone, *args, **kwargs)
 
 def helix(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color'], oType='helix', factory=js_helix, *args, **kwargs)
+    return glowProxy(vecAttrs=['pos', 'axis', 'color','size'], oType='helix', factory=js_helix, *args, **kwargs)
 
 def label(*args, **kwargs):
     return glowProxy(vecAttrs=['pos', 'color'], oType='label', factory=js_label, *args, **kwargs)
@@ -255,15 +257,24 @@ class quadProxy(glowProxy):
 def quad(*args, **kwargs):
     return quadProxy(*args, **kwargs)
 
-class sceneProxy(glowProxy):
+class canvasProxy(glowProxy):
     """
     A proxy for a glowscript scene.
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(vecAttrs = ['forward', 'center', 'background', 'ambient'], listAttrs=['lights'], oType='scene', jsObj = js_scene)
+    def __init__(self, *args, jsObj=None, factory=None, **kwargs):
+        super().__init__(vecAttrs = ['forward', 'center', 'background', 'ambient','up'], listAttrs=['lights'], oType='canvas', jsObj = jsObj, factory=factory, **kwargs)
 
     def bind(self, action, py_func):
         self.jsObj.bind(action, create_proxy(py_func))
+
+    @property
+    def camera(self):
+        return cameraProxy(jsObj=self.jsObj.camera)
+
+scene = canvasProxy(jsObj=js_scene)
+
+def canvas(*args, **kwargs):
+    return canvasProxy(factory=js_canvas, *args, **kwargs)
 
 def curveDictToJS(d):
     """
@@ -304,11 +315,6 @@ def curve(*args, **kwargs):
 def points(*args, **kwargs):
     return curveProxy(*args, oType='points', factory=js_points, **kwargs)
 
-scene = sceneProxy()
-
-def canvas(*args, **kwargs):
-    return glowProxy(vecAttrs = ['forward', 'center', 'background'], listAttrs=['lights'], oType='canvas', factory=js_canvas, *args, **kwargs)
-
 def compound(*args, **kwargs):
     if len(args) != 1:
         raise Exception("compound: must have exactly 1 unnamed argument")
@@ -323,3 +329,9 @@ def attach_light(*args, **kwargs):
     elif (not isinstance(args[0], glowProxy)):
         raise Exception("attach_light: must have a glowProxy as the unnamed argument")
     return glowProxy(vecAttrs=['offset','color'], oType='attach_light', factory=js_attach_light, *(args[0].jsObj,), **kwargs)
+
+class cameraProxy(glowProxy):
+    def __init__(self, *args, jsObj=None):
+        if not jsObj:
+            raise Exception("must specify a camera as a jsObj")
+        super().__init__(vecAttrs=['pos','axis'], oType='camera', jsObj=jsObj)
