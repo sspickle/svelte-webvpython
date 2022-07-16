@@ -9,6 +9,9 @@ from .vec_js import vector_js as vector
 from .color import color
 from js import textures, bumpmaps
 
+import time
+clock = time.perf_counter
+
 vec = vector
 py_vec = vector
 
@@ -18,4 +21,4 @@ __all__ = ["sphere", "box", "color", "vec", "py_vec", "js_vec", "vector", "rate"
 'ellipsoid', 'pyramid', 'ring', 'text', 'textures', 'attach_light', 'local_light','button',
 'slider', 'wtext', 'radio', 'checkbox', 'menu', 'curve', 'points','vertex', 'triangle','quad',
 'extrusion', 'paths','shapes', 'canvas','textures', 'compound','color','js_debug',
-'graph', 'gcurve', 'gvbars', 'gdots','bumpmaps']
+'graph', 'gcurve', 'gvbars', 'gdots','bumpmaps', 'clock']

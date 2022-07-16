@@ -282,7 +282,7 @@ class graph(glowProxy):
 
 class gcurve(glowProxy):
     def __init__(self, *args, **kwargs):
-        glowProxy.__init__(self, oType='gcurve', vecAttrs=['color','marker_color'], factory=js_gcurve, *args, **kwargs)
+        glowProxy.__init__(self, oType='gcurve', vecAttrs=['color','marker_color','dot_color'], factory=js_gcurve, *args, **kwargs)
 
 class gvbars(glowProxy):
     def __init__(self, *args, **kwargs):
@@ -343,11 +343,12 @@ class canvasProxy(glowProxy):
     def mouse(self):
         return mouseProxy(jsObj=self.jsObj.mouse)
 
-scene = canvasProxy(jsObj=js_scene)
 
-class canvas(glowProxy):
+class canvas(canvasProxy):
     def __init__(self, *args, **kwargs):
         canvasProxy.__init__(self, factory=js_canvas, *args, **kwargs)
+
+scene = canvas(jsObj=js_scene)
 
 def curveDictToJS(d):
     """
