@@ -19,8 +19,32 @@ from .vec_js import vector_js as vector
 from .vec_conversion import js2py_vec, py2js_vec
 from .shapes_piodide import convertPyVecsToJSList
 
-gsObjs = {}
-gsCntr = 0
+class GSRegistry(object):
+    """
+    Manage a registry of objects so we can look up the python object
+    from the corresponding javascript object.
+    """
+    def __init__(self):
+        self.counter = 0
+        self.registry = {}
+
+    def register(self, obj):
+        result = self.counter
+        self.registry[self.counter] = obj
+        self.counter += 1
+        return result
+
+    def get(self, index):
+        result = self.registry.get(index,None)
+        if result is None:
+            raise Exception("GSRegistry: object with index %d not found" % index)
+        return result
+
+gsRegistry = GSRegistry()
+gsRegKey = '__gsIndex__'
+
+def js_debug(*args):
+    js_window.__reportScriptError(to_js(args))
 
 def translate_kwargs_rest(kwargs, notAttrs):
     # Handle everything else
@@ -92,7 +116,8 @@ class glowProxy(object):
             self.jsObj = jsObj
         else:
             self.jsObj = factory(*args, **kwargs)
-            setattr(self.jsObj, '__pytype__', self.oType) # this doesn't seem to work :(
+            index = gsRegistry.register(self)
+            setattr(self.jsObj, gsRegKey, index)
 
     def translate_all_kwargs(self, kwargs):
         """
@@ -284,7 +309,6 @@ class canvasProxy(glowProxy):
         super().__init__(vecAttrs = ['forward', 'center', 'background', 'ambient','up'], listAttrs=['lights'], oType='canvas', jsObj = jsObj, factory=factory, **kwargs)
 
     def bind(self, action, py_func):
-        print("canvasProxy.bind: action =", action, py_func)
         self.jsObj.bind(action, create_proxy(py_func))
 
     @property
@@ -293,7 +317,6 @@ class canvasProxy(glowProxy):
 
     @property
     def mouse(self):
-        print("in mouse getter")
         return mouseProxy(jsObj=self.jsObj.mouse)
 
 scene = canvasProxy(jsObj=js_scene)
@@ -363,20 +386,13 @@ class cameraProxy(glowProxy):
 
 class mouseProxy(glowProxy):
     def __init__(self, *args, jsObj=None):
-        print("mouseProxy.__init__: args =", jsObj)
         if not jsObj:
             raise Exception("must specify a mouse as a jsObj")
         super().__init__(vecAttrs=['pos'], oType='mouse', jsObj=jsObj)
 
     @property
     def pick(self):
-        print("in mouse pick getter")
-        if self.jsObj.pick:
-            result = getattr(self.jsObj.pick,'__pytype__',None)
-            if result:
-                print("got result type:", result, type(result))
-            else:
-                print("pick but no pytype")
-        else:
-            print("no pick")
-        return self.jsObj.pick
+        picked = self.jsObj.pick()
+        index = getattr(picked,gsRegKey)
+        pyObj = gsRegistry.get(index)
+        return pyObj

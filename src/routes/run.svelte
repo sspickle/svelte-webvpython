@@ -45,7 +45,8 @@ from vpython import *
 			window.scene = scene;
 			//@ts-ignore
 			window.__reportScriptError = (err) => {
-				redirect_stderr(JSON.stringify(err));
+				redirect_stderr('__reportScriptError:' + JSON.stringify(err));
+				debugger;
 			};
 			stdoutStore.set('');
 			mounted = true;
