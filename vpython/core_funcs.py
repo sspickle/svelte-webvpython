@@ -187,82 +187,107 @@ class glowProxy(object):
 
         return glowProxy(*args, jsObj=cjs, **{**kwargs, **kwAdd})
 
-def sphere(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos','color','size','trail_color'], oType='sphere', factory=js_sphere, *args, **kwargs)
+class sphere(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos','color','size','trail_color'], oType='sphere', factory=js_sphere, *args, **kwargs)
 
-def box(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos','color','size','axis'], oType='box', factory=js_box, *args, **kwargs)
+class box(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos','color','size','axis'], oType='box', factory=js_box, *args, **kwargs)
 
-def cylinder(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color','size'], oType='cylinder', factory=js_cylinder, *args, **kwargs)
+class cylinder(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'axis', 'color','size'], oType='cylinder', factory=js_cylinder, *args, **kwargs)
 
-def arrow(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color'], oType='arrow', factory=js_arrow, *args, **kwargs)
+class arrow(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'axis', 'color'], oType='arrow', factory=js_arrow, *args, **kwargs)
 
-def cone(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color','size'], oType='cone', factory=js_cone, *args, **kwargs)
+class cone(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'axis', 'color','size'], oType='cone', factory=js_cone, *args, **kwargs)
 
-def helix(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'color','size'], oType='helix', factory=js_helix, *args, **kwargs)
+class helix(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'axis', 'color','size'], oType='helix', factory=js_helix, *args, **kwargs)
 
-def label(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'color'], oType='label', factory=js_label, *args, **kwargs)
+class label(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'color'], oType='label', factory=js_label, *args, **kwargs)
 
-def ellipsoid(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'color', 'axis', 'size'], oType='ellipsoid', factory=js_ellipsoid, *args, **kwargs)
+class ellipsoid(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'color', 'axis', 'size'], oType='ellipsoid', factory=js_ellipsoid, *args, **kwargs)
 
-def pyramid(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'color', 'axis', 'size'], oType='pyramid', factory=js_pyramid, *args, **kwargs)
+class pyramid(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'color', 'axis', 'size'], oType='pyramid', factory=js_pyramid, *args, **kwargs)
 
-def ring(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'color', 'axis', 'size'], oType='ring', factory=js_ring, *args, **kwargs)
+class ring(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'color', 'axis', 'size'], oType='ring', factory=js_ring, *args, **kwargs)
 
-def text(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'color', 'axis'], oType='text', factory=js_text, *args, **kwargs)
+class text(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'color', 'axis'], oType='text', factory=js_text, *args, **kwargs)
 
-def button(*args, **kwargs):
-    return glowProxy(funcAttrs=['bind'], oType='button', factory=js_button, *args, **kwargs)
+class button(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, funcAttrs=['bind'], oType='button', factory=js_button, *args, **kwargs)
 
-def slider(*args, **kwargs):
-    return glowProxy(funcAttrs=['bind'], oType='slider', factory=js_slider, *args, **kwargs)
+class slider(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, funcAttrs=['bind'], oType='slider', factory=js_slider, *args, **kwargs)
 
-def radio(*args, **kwargs):
-    return glowProxy(funcAttrs=['bind'], oType='radio', factory=js_radio, *args, **kwargs)
+class radio(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, funcAttrs=['bind'], oType='radio', factory=js_radio, *args, **kwargs)
 
-def checkbox(*args, **kwargs):
-    return glowProxy(funcAttrs=['bind'], oType='checkbox', factory=js_checkbox, *args, **kwargs)
+class checkbox(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, funcAttrs=['bind'], oType='checkbox', factory=js_checkbox, *args, **kwargs)
 
-def menu(*args, **kwargs):
-    return glowProxy(funcAttrs=['bind'], listAttrs=['choices'], oType='menu', factory=js_menu, *args, **kwargs)
+class menu(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, funcAttrs=['bind'], listAttrs=['choices'], oType='menu', factory=js_menu, *args, **kwargs)
 
-def wtext(*args, **kwargs):
-    return glowProxy(oType='wtext', factory=js_wtext, *args, **kwargs)
+class wtext(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, oType='wtext', factory=js_wtext, *args, **kwargs)
 
-def distant_light(*args, **kwargs):
-    return glowProxy(vecAttrs=['color','direction'], oType='distant_light', factory=js_distant_light, *args, **kwargs)
+class distant_light(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['color','direction'], oType='distant_light', factory=js_distant_light, *args, **kwargs)
 
-def local_light(*args, **kwargs):
-    return glowProxy(vecAttrs=['color','pos'], oType='local_light', factory=js_local_light, *args, **kwargs)
+class local_light(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['color','pos'], oType='local_light', factory=js_local_light, *args, **kwargs)
 
-def vertex(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos','color','normal'], oType='vertex', factory=js_vertex, *args, **kwargs)
+class vertex(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos','color','normal'], oType='vertex', factory=js_vertex, *args, **kwargs)
 
-def extrusion(*args, **kwargs):
-    return glowProxy(vecAttrs=['pos', 'axis', 'up', 'color', 'start_face_color','end_face_color'], nestAttrs=['shape','path'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
+class extrusion(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos', 'axis', 'up', 'color', 'start_face_color','end_face_color'], nestAttrs=['shape','path'], oType='extrusion', factory=js_extrusion, *args, **kwargs)
 
-def graph(*args, **kwargs):
-    return glowProxy(oType='graph', factory=js_graph, *args, **kwargs)
+class graph(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, oType='graph', factory=js_graph, *args, **kwargs)
 
-def gcurve(*args, **kwargs):
-    return glowProxy(oType='gcurve', vecAttrs=['color','marker_color'], factory=js_gcurve, *args, **kwargs)
+class gcurve(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, oType='gcurve', vecAttrs=['color','marker_color'], factory=js_gcurve, *args, **kwargs)
 
-def gvbars(*args, **kwargs):
-    return glowProxy(oType='gvbars', vecAttrs=['color','marker_color'], factory=js_gvbars, *args, **kwargs)
+class gvbars(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, oType='gvbars', vecAttrs=['color','marker_color'], factory=js_gvbars, *args, **kwargs)
 
-def gdots(*args, **kwargs):
-    return glowProxy(oType='gdots', vecAttrs=['color','marker_color'], factory=js_gdots, *args, **kwargs)
+class gdots(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, oType='gdots', vecAttrs=['color','marker_color'], factory=js_gdots, *args, **kwargs)
 
-class triangleProxy(glowProxy):
+class triangle(glowProxy):
     def __init__(self, *args, **kwargs):
         if ('v0' in kwargs) and ('v1' in kwargs) and ('v2' in kwargs):
             vDict = {**kwargs, 'v0':kwargs['v0'].jsObj, 'v1':kwargs['v1'].jsObj, 'v2':kwargs['v2'].jsObj}
@@ -276,10 +301,7 @@ class triangleProxy(glowProxy):
         jsObj = js_triangle(**vDict)
         super().__init__(oType='triangle', jsObj=jsObj)
 
-def triangle(*args, **kwargs):
-    return triangleProxy(*args, **kwargs)
-
-class quadProxy(glowProxy):
+class quad(glowProxy):
     def __init__(self, *args, **kwargs):
         if ('v0' in kwargs) and ('v1' in kwargs) and ('v2' in kwargs) and ('v3' in kwargs):
             vDict = {**kwargs,
@@ -297,9 +319,6 @@ class quadProxy(glowProxy):
             raise Exception("triangleProxy: must specify v0, v1, v2, v3 or vs")
         jsObj = js_quad(**vDict)
         super().__init__(oType='triangle', jsObj=jsObj)
-
-def quad(*args, **kwargs):
-    return quadProxy(*args, **kwargs)
 
 class canvasProxy(glowProxy):
     """
@@ -321,8 +340,9 @@ class canvasProxy(glowProxy):
 
 scene = canvasProxy(jsObj=js_scene)
 
-def canvas(*args, **kwargs):
-    return canvasProxy(factory=js_canvas, *args, **kwargs)
+class canvas(glowProxy):
+    def __init__(self, *args, **kwargs):
+        canvasProxy.__init__(self, factory=js_canvas, *args, **kwargs)
 
 def curveDictToJS(d):
     """
@@ -334,7 +354,7 @@ def curveDictToJS(d):
         d['color'] = py2js_vec(d['color'])
     return d
 
-class curveProxy(glowProxy):
+class curve(glowProxy):
     """
     curves are a bit special because there are so many ways to call the constructor.
     """
@@ -357,11 +377,9 @@ class curveProxy(glowProxy):
         else:
             self.jsObj.append(**std_kwargs)
 
-def curve(*args, **kwargs):
-    return curveProxy(*args, **kwargs)
-
-def points(*args, **kwargs):
-    return curveProxy(*args, oType='points', factory=js_points, **kwargs)
+def points(curveProxy):
+    def __init__(self, *args, **kwargs):
+        curveProxy.__init__(self, *args, oType='points', factory=js_points, **kwargs)
 
 def compound(*args, **kwargs):
     if len(args) != 1:
