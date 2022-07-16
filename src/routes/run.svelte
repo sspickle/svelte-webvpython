@@ -82,6 +82,7 @@ from vpython import *
 			if (pyodide) {
 				let asyncProgram = program.replace(/[^\.\w\n]rate[\ ]*\(/g, ' await rate('); // replace ` rate(` with `async async_rate(`
 				asyncProgram = asyncProgram.replace(/\n]rate[\ ]*\(/g, '\n await rate('); // replace '\nrate(` with `\nasync async_rate(`
+				asyncProgram = asyncProgram.replace(/scene\.waitfor[\ ]*\(/g, 'await scene.waitfor('); // replace `scene.waitfor(` with `scene.waitfor(`
 				if (applyDefaultImports) {
 					await pyodide.loadPackagesFromImports(defaultImportCode);
 					var result = await pyodide.runPythonAsync(defaultImportCode);
