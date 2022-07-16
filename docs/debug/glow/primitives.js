@@ -654,9 +654,7 @@
 		}
 	})
     
-    function box(args) { 
-        return initObject(this, box, args) 
-    }
+    function box(args) { return initObject(this, box, args) }
     subclass(box, Primitive)
     box.prototype.__hasPosAtCenter = true
     property.declare( box.prototype, {
@@ -1898,9 +1896,7 @@
                 		obj.pos = vec(obj.pos) // make sure that we use a copy of the object's pos
                 		for (var a in obj) attrs[a] = obj[a]
                 	} else {
-                		if (!(obj instanceof vec)) {
-							throw new Error("A pos of a curve object must be a vector.")
-						}
+                		if (!(obj instanceof vec)) throw new Error("A pos of a curve object must be a vector.")
                 		attrs['pos'] = vec(obj) // make sure that we use a copy of the object's pos
                     	for (var a in specs) attrs[a] = specs[a]
                 	}
