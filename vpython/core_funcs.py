@@ -43,8 +43,10 @@ class GSRegistry(object):
 gsRegistry = GSRegistry()
 gsRegKey = '__gsIndex__'
 
-def js_debug(*args):
-    js_window.__reportScriptError(to_js(args))
+def js_debug(*args, convert=True):
+    if convert:
+        args = to_js(args)
+    js_window.__reportScriptError(args)
 
 def translate_kwargs_rest(kwargs, notAttrs):
     # Handle everything else
@@ -114,10 +116,11 @@ class glowProxy(object):
 
         if factory is None:
             self.jsObj = jsObj
+            if (not hasattr(jsObj, gsRegKey)):
+                setattr(jsObj, gsRegKey, gsRegistry.register(self))
         else:
             self.jsObj = factory(*args, **kwargs)
-            index = gsRegistry.register(self)
-            setattr(self.jsObj, gsRegKey, index)
+            setattr(self.jsObj, gsRegKey, gsRegistry.register(self))
 
     def translate_all_kwargs(self, kwargs):
         """
@@ -147,7 +150,10 @@ class glowProxy(object):
         elif name in self.vecAttrs:
             return js2py_vec(getattr(self.jsObj, name), jsObj=getattr(self.jsObj,name)) # keep jsObj embedded in pyObj
         else:
-            return getattr(self.jsObj, name)
+            result = getattr(self.jsObj, name)
+            if hasattr(result,gsRegKey):
+                return gsRegistry.get(getattr(result,gsRegKey))
+            return result
 
     def __str__(self):
         return "glowProxy: " + self.oType
@@ -299,7 +305,7 @@ class triangle(glowProxy):
         else:
             raise Exception("triangleProxy: must specify v0, v1, v2 or vs")
         jsObj = js_triangle(**vDict)
-        super().__init__(oType='triangle', jsObj=jsObj)
+        super().__init__(oType='triangle', vecAttrs=['color','v0','v1','v2'], jsObj=jsObj)
 
 class quad(glowProxy):
     def __init__(self, *args, **kwargs):
@@ -316,9 +322,9 @@ class quad(glowProxy):
                 raise Exception("quadProxy: must have exactly 4 vertices")
             vDict = {**kwargs, 'vs':vertices}
         else:
-            raise Exception("triangleProxy: must specify v0, v1, v2, v3 or vs")
+            raise Exception("quadProxy: must specify v0, v1, v2, v3 or vs")
         jsObj = js_quad(**vDict)
-        super().__init__(oType='triangle', jsObj=jsObj)
+        glowProxy.__init__(self, oType='quad', vecAttrs=['color'], jsObj=jsObj)
 
 class canvasProxy(glowProxy):
     """
@@ -377,6 +383,10 @@ class curve(glowProxy):
         else:
             self.jsObj.append(**std_kwargs)
 
+    def point(self, n):
+        pt = self.jsObj.point(n)
+        return {'pos':pt.pos, 'color':pt.color, 'radius':pt.radius, 'visible':pt.visible}
+
 def points(curveProxy):
     def __init__(self, *args, **kwargs):
         curveProxy.__init__(self, *args, oType='points', factory=js_points, **kwargs)
@@ -411,6 +421,12 @@ class mouseProxy(glowProxy):
     @property
     def pick(self):
         picked = self.jsObj.pick()
-        index = getattr(picked,gsRegKey)
+        if picked is None:
+            return None
+
+        index = getattr(picked,gsRegKey,None)
+        if index is None:
+            return picked # it's not in the registry? Just return the JS object
+        
         pyObj = gsRegistry.get(index)
         return pyObj

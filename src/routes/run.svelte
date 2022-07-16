@@ -45,7 +45,11 @@ from vpython import *
 			window.scene = scene;
 			//@ts-ignore
 			window.__reportScriptError = (err) => {
-				redirect_stderr('__reportScriptError:' + JSON.stringify(err));
+				try {
+					redirect_stderr('__reportScriptError:' + JSON.stringify(err));
+				} catch (err) {
+					redirect_stderr('__reportScriptError: Not sure! Cannot stringify');
+				}
 				debugger;
 			};
 			stdoutStore.set('');
