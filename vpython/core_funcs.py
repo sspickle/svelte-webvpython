@@ -114,13 +114,16 @@ class glowProxy(object):
             if attr in kwargs:
                 del kwargs[attr] # don't pass these to js
 
-        if factory is None:
+        if jsObj is not None:
             self.jsObj = jsObj
             if (not hasattr(jsObj, gsRegKey)):
                 setattr(jsObj, gsRegKey, gsRegistry.register(self))
-        else:
+        elif factory is not None:
             self.jsObj = factory(*args, **kwargs)
             setattr(self.jsObj, gsRegKey, gsRegistry.register(self))
+        else:
+            raise Exception("glowProxy: must specify either factory or jsObj")
+
 
     def translate_all_kwargs(self, kwargs):
         """
@@ -186,12 +189,8 @@ class glowProxy(object):
         if 'pos' in kwargs:
             kwargs['pos'] = py2js_vec(kwargs['pos'])
         cjs = self.jsObj.clone(*args, **kwargs)
-        for attr in glowProxy.GP_defaults:
-            kwAdd = {}
-            if attr in self.__dict__:
-                kwAdd[attr] = self.__dict__[attr]
-
-        return glowProxy(*args, jsObj=cjs, **{**kwargs, **kwAdd})
+        ret = type(self)(*args, **kwargs, jsObj=cjs)
+        return ret
 
 class sphere(glowProxy):
     def __init__(self, *args, **kwargs):
@@ -271,7 +270,7 @@ class local_light(glowProxy):
 
 class vertex(glowProxy):
     def __init__(self, *args, **kwargs):
-        glowProxy.__init__(self, vecAttrs=['pos','color','normal'], oType='vertex', factory=js_vertex, *args, **kwargs)
+        glowProxy.__init__(self, vecAttrs=['pos','color','normal','texpos'], oType='vertex', factory=js_vertex, *args, **kwargs)
 
 class extrusion(glowProxy):
     def __init__(self, *args, **kwargs):
@@ -360,20 +359,20 @@ def curveDictToJS(d):
         d['color'] = py2js_vec(d['color'])
     return d
 
-class curve(glowProxy):
+class curveProxy(glowProxy):
     """
     curves are a bit special because there are so many ways to call the constructor.
     """
-    def __init__(self, *args, factory = js_curve, oType = 'curve', **kwargs):
+    def __init__(self, *args, factory = None, oType = 'curve', **kwargs):
         if not factory:
             factory = js_curve
         std_list, std_kwargs = getStdForm(*args, **kwargs)
         if (len(std_list)) > 0:
             std_list_js = to_js(list(map(lambda d: curveDictToJS(d), std_list)), dict_converter=Object.fromEntries)
-            super().__init__(oType='curve', factory = factory, vecAttrs=['color'], **std_kwargs) # doesn't like args + kwargs at the same time?
+            super().__init__(oType=oType, factory = factory, vecAttrs=['color'], **std_kwargs) # doesn't like args + kwargs at the same time?
             self.jsObj.append(std_list_js)
         else:
-            super().__init__(oType='curve', factory = factory, vecAttrs=['color'], **std_kwargs)
+            super().__init__(oType=oType, factory = factory, vecAttrs=['color'], **std_kwargs)
 
     def append(self, *args, **kwargs):
         std_list,std_kwargs = getStdForm(*args, **kwargs)
@@ -387,17 +386,25 @@ class curve(glowProxy):
         pt = self.jsObj.point(n)
         return {'pos':pt.pos, 'color':pt.color, 'radius':pt.radius, 'visible':pt.visible}
 
-def points(curveProxy):
+class curve(curveProxy):
+    def __init__(self, *args, **kwargs):
+        curveProxy.__init__(self, *args, oType='curve', factory=js_curve, **kwargs)
+
+class points(curveProxy):
     def __init__(self, *args, **kwargs):
         curveProxy.__init__(self, *args, oType='points', factory=js_points, **kwargs)
 
-def compound(*args, **kwargs):
-    if len(args) != 1:
-        raise Exception("compound: must have exactly 1 unnamed argument")
-    if not isinstance(args[0],list) or isinstance(args[0],tuple):
-        raise Exception("compound: must be passed a list or tuple of objects")
-    newArgs = to_js(list(map(lambda o: o.jsObj, args[0])))
-    return glowProxy(vecAttrs=['pos','axis'], *(newArgs,) , oType='compound', factory=js_compound, **kwargs)
+class compound(glowProxy):
+    def __init__(self, *args, **kwargs):
+        if 'jsObj' in kwargs:
+            return glowProxy.__init__(self, vecAttrs=['pos','axis','color'], *args, oType='compound', factory=js_compound, **kwargs)
+        else:
+            if len(args) != 1:
+                raise Exception("compound: must have exactly 1 unnamed argument")
+            if not isinstance(args[0],list) or isinstance(args[0],tuple):
+                raise Exception("compound: must be passed a list or tuple of objects")
+            newArgs = to_js(list(map(lambda o: o.jsObj, args[0])))
+            return glowProxy.__init__(self, vecAttrs=['pos','axis','color'], *(newArgs,) , oType='compound', factory=js_compound, **kwargs)
 
 def attach_light(*args, **kwargs):
     if (len(args) != 1):
