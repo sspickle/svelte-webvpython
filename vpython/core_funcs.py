@@ -5,7 +5,7 @@ from js import pyramid as js_pyramid, ring as js_ring, text as js_text
 from js import button as js_button, distant_light as js_distant_light, local_light as js_local_light
 from js import slider as js_slider, wtext as js_wtext, radio as js_radio, checkbox as js_checkbox
 from js import menu as js_menu, curve as js_curve, Object
-from js import points as js_points, extrusion as js_extrusion
+from js import points as js_points, extrusion as js_extrusion, simple_sphere as js_simple_sphere
 from js import window as js_window, fontloading as js_fontloading, waitforfonts as js_waitforfonts
 from js import quad as js_quad, vertex as js_vertex, triangle as js_triangle, ellipsoid as js_ellipsoid
 from js import canvas as js_canvas, attach_light as js_attach_light, compound as js_compound
@@ -195,6 +195,10 @@ class glowProxy(object):
 class sphere(glowProxy):
     def __init__(self, *args, **kwargs):
         glowProxy.__init__(self, vecAttrs=['pos','color','size','trail_color'], oType='sphere', factory=js_sphere, *args, **kwargs)
+
+class simple_sphere(glowProxy):
+    def __init__(self, *args, **kwargs):
+        glowProxy.__init__(self, vecAttrs=['pos','color','size','trail_color'], oType='simple_sphere', factory=js_simple_sphere, *args, **kwargs)
 
 class box(glowProxy):
     def __init__(self, *args, **kwargs):
