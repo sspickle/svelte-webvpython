@@ -5181,8 +5181,8 @@ var init__ = __esm({
   ".svelte-kit/output/server/nodes/0.js"() {
     init_layout_svelte();
     index = 0;
-    entry = "layout.svelte-ebd5302f.js";
-    js = ["layout.svelte-ebd5302f.js", "chunks/index-f57992c5.js"];
+    entry = "layout.svelte-80364661.js";
+    js = ["layout.svelte-80364661.js", "chunks/index-3b1e7adb.js"];
     css = [];
   }
 });
@@ -5233,13 +5233,13 @@ var init__2 = __esm({
   ".svelte-kit/output/server/nodes/1.js"() {
     init_error_svelte();
     index2 = 1;
-    entry2 = "error.svelte-6412077c.js";
-    js2 = ["error.svelte-6412077c.js", "chunks/index-f57992c5.js"];
+    entry2 = "error.svelte-bc954ae7.js";
+    js2 = ["error.svelte-bc954ae7.js", "chunks/index-3b1e7adb.js"];
     css2 = [];
   }
 });
 
-// .svelte-kit/output/server/chunks/prefs-c2125d4d.js
+// .svelte-kit/output/server/chunks/prefs-2f0e5787.js
 function writable(value, start = noop2) {
   let stop;
   const subscribers = /* @__PURE__ */ new Set();
@@ -5282,8 +5282,8 @@ function writable(value, start = noop2) {
   return { set, update, subscribe: subscribe2 };
 }
 var subscriber_queue, initialCode, srcStore, defaultPrefs, prefsStore;
-var init_prefs_c2125d4d = __esm({
-  ".svelte-kit/output/server/chunks/prefs-c2125d4d.js"() {
+var init_prefs_2f0e5787 = __esm({
+  ".svelte-kit/output/server/chunks/prefs-2f0e5787.js"() {
     init_index_164dc826();
     subscriber_queue = [];
     initialCode = `
@@ -5304,7 +5304,8 @@ while True:
 `;
     srcStore = writable(initialCode);
     defaultPrefs = {
-      add_default_imports: true
+      add_default_imports: true,
+      last_doc_id: ""
     };
     prefsStore = writable(defaultPrefs);
   }
@@ -5328,30 +5329,50 @@ var index_svelte_exports = {};
 __export(index_svelte_exports, {
   default: () => Routes
 });
-var css3, Routes;
+var currentUser, css3, Routes;
 var init_index_svelte = __esm({
   ".svelte-kit/output/server/entries/pages/index.svelte.js"() {
     init_index_164dc826();
-    init_prefs_c2125d4d();
+    init_prefs_2f0e5787();
     init_paths_396f020f();
+    currentUser = writable();
     css3 = {
-      code: ".remainder.svelte-z5d0oq.svelte-z5d0oq{display:flex;flex-direction:column;height:100vh;margin:0}.remainder.svelte-z5d0oq #editor.svelte-z5d0oq{flex-grow:1}.editor.svelte-z5d0oq.svelte-z5d0oq{overflow:auto;max-width:100%;max-height:100%}",
+      code: ".remainder.svelte-cmikal.svelte-cmikal{display:flex;flex-direction:column;height:80vh;margin:0}.remainder.svelte-cmikal #editor.svelte-cmikal{flex-grow:1}.editor.svelte-cmikal.svelte-cmikal{overflow:auto;max-width:100%;max-height:100%}",
       map: null
     };
     Routes = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-      let $$unsubscribe_srcStore;
       let $prefsStore, $$unsubscribe_prefsStore;
-      $$unsubscribe_srcStore = subscribe(srcStore, (value) => value);
+      let $$unsubscribe_srcStore;
+      let $currentUser, $$unsubscribe_currentUser;
       $$unsubscribe_prefsStore = subscribe(prefsStore, (value) => $prefsStore = value);
+      $$unsubscribe_srcStore = subscribe(srcStore, (value) => value);
+      $$unsubscribe_currentUser = subscribe(currentUser, (value) => $currentUser = value);
+      let docid = "";
       let divEl = null;
+      let savedComment = "";
+      currentUser.subscribe((user) => {
+      });
       $$result.css.add(css3);
-      $$unsubscribe_srcStore();
       $$unsubscribe_prefsStore();
+      $$unsubscribe_srcStore();
+      $$unsubscribe_currentUser();
       return `<a href="${escape(base, true) + "/run"}">Run this program</a>
 <input type="${"checkbox"}" name="${"default includes"}" ${$prefsStore.add_default_imports ? "checked" : ""}>
 Apply Default Imports
-<div class="${"remainder svelte-z5d0oq"}"><div class="${"editor svelte-z5d0oq"}" id="${"editor"}"${add_attribute("this", divEl, 0)}></div>
-</div>`;
+
+${docid.length > 0 && $currentUser ? `<button>Save</button>
+
+	<span>Currently editing: gid: ${escape(docid)}</span>
+
+	<span>${escape(savedComment)}</span>` : ``}
+
+${$currentUser ? `<div><h4>Logged in as: ${escape($currentUser.name)}</h4>
+		<button>Logout</button></div>` : `<span>No user</span>
+	<button>Login</button>`}
+
+<div class="${"remainder svelte-cmikal"}"><div class="${"editor svelte-cmikal"}" id="${"editor"}"${add_attribute("this", divEl, 0)}></div></div>
+
+${$$result.head += `<script async defer src="${"https://apis.google.com/js/api.js"}" data-svelte="svelte-ct8fo5"><\/script>`, ""}`;
     });
   }
 });
@@ -5370,9 +5391,9 @@ var init__3 = __esm({
   ".svelte-kit/output/server/nodes/2.js"() {
     init_index_svelte();
     index3 = 2;
-    entry3 = "pages/index.svelte-f67a7ad6.js";
-    js3 = ["pages/index.svelte-f67a7ad6.js", "chunks/preload-helper-60cab3ee.js", "chunks/index-f57992c5.js", "chunks/prefs-79816110.js", "chunks/paths-3a77cd68.js"];
-    css4 = ["assets/pages/index.svelte-8727518a.css"];
+    entry3 = "pages/index.svelte-2ea0a432.js";
+    js3 = ["pages/index.svelte-2ea0a432.js", "chunks/preload-helper-60cab3ee.js", "chunks/index-3b1e7adb.js", "chunks/prefs-ed3737a1.js", "chunks/paths-58176f9b.js"];
+    css4 = ["assets/pages/index.svelte-64f44da9.css"];
   }
 });
 
@@ -5385,7 +5406,7 @@ var stdoutStore, Run;
 var init_run_svelte = __esm({
   ".svelte-kit/output/server/entries/pages/run.svelte.js"() {
     init_index_164dc826();
-    init_prefs_c2125d4d();
+    init_prefs_2f0e5787();
     init_paths_396f020f();
     stdoutStore = writable("");
     Run = create_ssr_component(($$result, $$props, $$bindings, slots) => {
@@ -5420,8 +5441,8 @@ var init__4 = __esm({
   ".svelte-kit/output/server/nodes/3.js"() {
     init_run_svelte();
     index4 = 3;
-    entry4 = "pages/run.svelte-87b08178.js";
-    js4 = ["pages/run.svelte-87b08178.js", "chunks/index-f57992c5.js", "chunks/paths-3a77cd68.js", "chunks/prefs-79816110.js"];
+    entry4 = "pages/run.svelte-e9929bf0.js";
+    js4 = ["pages/run.svelte-e9929bf0.js", "chunks/index-3b1e7adb.js", "chunks/paths-58176f9b.js", "chunks/prefs-ed3737a1.js"];
     css5 = [];
   }
 });
@@ -14124,7 +14145,7 @@ var manifest = {
   assets: /* @__PURE__ */ new Set([".nojekyll", "debug/.DS_Store", "debug/favicon.png", "debug/flot/API.txt", "debug/flot/FAQ.txt", "debug/flot/LICENSE.txt", "debug/flot/Makefile", "debug/flot/NEWS.txt", "debug/flot/PLUGINS.txt", "debug/flot/README.txt", "debug/flot/excanvas.js", "debug/flot/excanvas.min.js", "debug/flot/jquery.colorhelpers.js", "debug/flot/jquery.colorhelpers.min.js", "debug/flot/jquery.flot.crosshair.js", "debug/flot/jquery.flot.crosshair.min.js", "debug/flot/jquery.flot.crosshair_GS.js", "debug/flot/jquery.flot.fillbetween.js", "debug/flot/jquery.flot.fillbetween.min.js", "debug/flot/jquery.flot.image.js", "debug/flot/jquery.flot.image.min.js", "debug/flot/jquery.flot.js", "debug/flot/jquery.flot.navigate.js", "debug/flot/jquery.flot.navigate.min.js", "debug/flot/jquery.flot.pie.js", "debug/flot/jquery.flot.pie.min.js", "debug/flot/jquery.flot.resize.js", "debug/flot/jquery.flot.resize.min.js", "debug/flot/jquery.flot.selection.js", "debug/flot/jquery.flot.selection.min.js", "debug/flot/jquery.flot.stack.js", "debug/flot/jquery.flot.stack.min.js", "debug/flot/jquery.flot.symbol.js", "debug/flot/jquery.flot.symbol.min.js", "debug/flot/jquery.flot.threshold.js", "debug/flot/jquery.flot.threshold.min.js", "debug/flot/jquery.js", "debug/flot/jquery.min.js", "debug/glMatrix.js", "debug/glow/WebGLRenderer.js", "debug/glow/api_misc.js", "debug/glow/autoscale.js", "debug/glow/canvas.js", "debug/glow/color.js", "debug/glow/extrude.js", "debug/glow/glow.css", "debug/glow/graph.js", "debug/glow/mesh.js", "debug/glow/orbital_camera.js", "debug/glow/primitives.js", "debug/glow/property.js", "debug/glow/shaders.gen.js", "debug/glow/shapespaths.js", "debug/glow/vectors.js", "debug/glow/vectors_no_overload.js", "debug/jquery/.DS_Store", "debug/jquery/1.1/jquery-ui.custom.min.js", "debug/jquery/1.1/jquery.min.js", "debug/jquery/1.1/jquery.mousewheel.js", "debug/jquery/1.1/jquery.textchange.min.js", "debug/jquery/1.1/jquery.ui.touch-punch.min.js", "debug/jquery/2.0/jquery-ui.custom.min.js", "debug/jquery/2.0/jquery.min.js", "debug/jquery/2.0/jquery.mousewheel.js", "debug/jquery/2.0/jquery.ui.touch-punch.min.js", "debug/jquery/2.1/jquery-ui.custom.min.js", "debug/jquery/2.1/jquery.min.js", "debug/jquery/2.1/jquery.mousewheel.js", "debug/jquery/IDE/jquery-ui.custom.min.js", "debug/jquery/IDE/jquery.min.js", "debug/jquery/IDE/jquery.textchange.custom.js", "debug/jquery/IDE/jquery.ui.touch-punch.min.js", "debug/jquery/JqueryVersions.txt", "debug/jquery/bef1.1/jquery-ui.custom.min.js", "debug/jquery/bef1.1/jquery.min.js", "debug/jquery/bef1.1/jquery.mousewheel.js", "debug/jquery/bef1.1/jquery.textchange.min.js", "debug/jquery/jquery-1.6.2.min.js", "debug/jquery/jquery-ui-1.8.16.custom.min.js", "debug/jquery/jquery-ui.custom.min.js", "debug/jquery/jquery.min.js", "debug/jquery/jquery.mousewheel.js", "debug/jquery/jquery.textchange.min.js", "debug/jquery/versions/jquery-1.10.2.min.js", "debug/jquery/versions/jquery-1.11.1.min.js", "debug/jquery/versions/jquery-1.12.0.min.js", "debug/jquery/versions/jquery-1.6.2.min.js", "debug/jquery/versions/jquery-1.8.0.min.js", "debug/jquery/versions/jquery-1.8.3.min.js", "debug/jquery/versions/jquery-1.9.1.min.js", "debug/jquery/versions/jquery-3.1.13.mousewheel.js", "debug/jquery/versions/jquery-ui-1.10.4.custom.min.js", "debug/jquery/versions/jquery-ui-1.11.0.custom.min.js", "debug/jquery/versions/jquery-ui-1.11.4.custom.min.js", "debug/jquery/versions/jquery-ui-1.8.16.custom.min.js", "debug/jquery/versions/jquery-ui-1.8.23.custom.min.js", "debug/jquery/versions/jquery.mousewheel-3.0.6.js", "debug/jquery/versions/jquery.mousewheel-3.1.11.js", "debug/jquery/versions/jquery.textchange.custom.js", "debug/jquery/versions/jquery.textchange.min.js", "debug/jquery/versions/jquery.ui.touch-punch.min-0.2.3.js", "debug/opentype/opentype.js", "debug/opentype/poly2tri.js", "debug/plotly.js", "debug/vpython.zip", "debug/webgl-utils.js", "favicon.png", "vpython.zip"]),
   mimeTypes: { ".png": "image/png", ".txt": "text/plain", ".js": "application/javascript", ".css": "text/css", ".zip": "application/zip" },
   _: {
-    entry: { "file": "start-7fdfd057.js", "js": ["start-7fdfd057.js", "chunks/index-f57992c5.js", "chunks/paths-3a77cd68.js", "chunks/preload-helper-60cab3ee.js"], "css": [] },
+    entry: { "file": "start-c825cb04.js", "js": ["start-c825cb04.js", "chunks/index-3b1e7adb.js", "chunks/paths-58176f9b.js", "chunks/preload-helper-60cab3ee.js"], "css": [] },
     nodes: [
       () => Promise.resolve().then(() => (init__(), __exports)),
       () => Promise.resolve().then(() => (init__2(), __exports2)),
@@ -16490,7 +16511,61 @@ async function respond(request2, options, state) {
     }
   }
 }
-var template = ({ head, body: body2, assets: assets2, nonce }) => '<!DOCTYPE html>\n<html lang="en">\n	<head>\n		<link rel="icon" href="' + assets2 + '/favicon.png" />\n		<script src="https://cdn.jsdelivr.net/pyodide/dev/full/pyodide.js"><\/script>\n		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n		<link\n			type="text/css"\n			href="https://www.glowscript.org/css/redmond/2.1/jquery-ui.custom.css"\n			rel="stylesheet"\n		/>\n		<link type="text/css" href="https://www.glowscript.org/css/ide.css" rel="stylesheet" />\n		<script\n			type="text/javascript"\n			src="https://www.glowscript.org/lib/jquery/2.1/jquery.min.js"\n		><\/script>\n		<script\n			type="text/javascript"\n			src="https://www.glowscript.org/lib/jquery/2.1/jquery-ui.custom.min.js"\n		><\/script>\n		<script\n			type="text/javascript"\n			src="https://www.glowscript.org/package/glow.3.2.min.js"\n		><\/script>\n		<!-- <script type="text/javascript" src="debug/jquery/2.1/jquery.mousewheel.js"><\/script>\n		<script type="text/javascript" src="debug/flot/jquery.flot.js"><\/script>\n		<script type="text/javascript" src="debug/flot/jquery.flot.crosshair_GS.js"><\/script>\n		<script type="text/javascript" src="debug/plotly.js"><\/script>\n		<script type="text/javascript" src="debug/opentype/poly2tri.js"><\/script>\n		<script type="text/javascript" src="debug/opentype/opentype.js"><\/script>\n		<script type="text/javascript" src="debug/glMatrix.js"><\/script>\n		<script type="text/javascript" src="debug/webgl-utils.js"><\/script>\n		<script type="text/javascript" src="debug/glow/property.js"><\/script>\n		<script type="text/javascript" src="debug/glow/vectors.js"><\/script>\n		<script type="text/javascript" src="debug/glow/mesh.js"><\/script>\n		<script type="text/javascript" src="debug/glow/canvas.js"><\/script>\n		<script type="text/javascript" src="debug/glow/orbital_camera.js"><\/script>\n		<script type="text/javascript" src="debug/glow/autoscale.js"><\/script>\n		<script type="text/javascript" src="debug/glow/api_misc.js"><\/script>\n		<script type="text/javascript" src="debug/glow/WebGLRenderer.js"><\/script>\n		<script type="text/javascript" src="debug/glow/graph.js"><\/script>\n		<script type="text/javascript" src="debug/glow/color.js"><\/script>\n		<script type="text/javascript" src="debug/glow/shapespaths.js"><\/script>\n		<script type="text/javascript" src="debug/glow/primitives.js"><\/script>\n		<script type="text/javascript" src="debug/glow/extrude.js"><\/script>\n		<script type="text/javascript" src="debug/glow/shaders.gen.js"><\/script> -->\n\n		<meta name="viewport" content="width=device-width, initial-scale=1" />\n		' + head + "\n	</head>\n	<body>\n		<div>" + body2 + "</div>\n	</body>\n</html>\n";
+var template = ({ head, body: body2, assets: assets2, nonce }) => '<!DOCTYPE html>\n<html lang="en">\n	<head>\n		<link rel="icon" href="' + assets2 + `/favicon.png" />
+		<script src="https://cdn.jsdelivr.net/pyodide/dev/full/pyodide.js"><\/script>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link
+			type="text/css"
+			href="https://www.glowscript.org/css/redmond/2.1/jquery-ui.custom.css"
+			rel="stylesheet"
+		/>
+		<link type="text/css" href="https://www.glowscript.org/css/ide.css" rel="stylesheet" />
+		<meta
+			name="google-signin-client_id"
+			content="1055404475074-die17tdha84ak0u9d3fdvns2aqcvkfbp.apps.googleusercontent.com"
+		/>
+		<script
+			type="text/javascript"
+			src="https://www.glowscript.org/lib/jquery/2.1/jquery.min.js"
+		><\/script>
+		<script
+			type="text/javascript"
+			src="https://www.glowscript.org/lib/jquery/2.1/jquery-ui.custom.min.js"
+		><\/script>
+		<script
+			type="text/javascript"
+			src="https://www.glowscript.org/package/glow.3.2.min.js"
+		><\/script>
+		<script>
+			function logonCallback() {
+				console.log('Init called!');
+			}
+		<\/script>
+		<!-- <script type="text/javascript" src="debug/jquery/2.1/jquery.mousewheel.js"><\/script>
+		<script type="text/javascript" src="debug/flot/jquery.flot.js"><\/script>
+		<script type="text/javascript" src="debug/flot/jquery.flot.crosshair_GS.js"><\/script>
+		<script type="text/javascript" src="debug/plotly.js"><\/script>
+		<script type="text/javascript" src="debug/opentype/poly2tri.js"><\/script>
+		<script type="text/javascript" src="debug/opentype/opentype.js"><\/script>
+		<script type="text/javascript" src="debug/glMatrix.js"><\/script>
+		<script type="text/javascript" src="debug/webgl-utils.js"><\/script>
+		<script type="text/javascript" src="debug/glow/property.js"><\/script>
+		<script type="text/javascript" src="debug/glow/vectors.js"><\/script>
+		<script type="text/javascript" src="debug/glow/mesh.js"><\/script>
+		<script type="text/javascript" src="debug/glow/canvas.js"><\/script>
+		<script type="text/javascript" src="debug/glow/orbital_camera.js"><\/script>
+		<script type="text/javascript" src="debug/glow/autoscale.js"><\/script>
+		<script type="text/javascript" src="debug/glow/api_misc.js"><\/script>
+		<script type="text/javascript" src="debug/glow/WebGLRenderer.js"><\/script>
+		<script type="text/javascript" src="debug/glow/graph.js"><\/script>
+		<script type="text/javascript" src="debug/glow/color.js"><\/script>
+		<script type="text/javascript" src="debug/glow/shapespaths.js"><\/script>
+		<script type="text/javascript" src="debug/glow/primitives.js"><\/script>
+		<script type="text/javascript" src="debug/glow/extrude.js"><\/script>
+		<script type="text/javascript" src="debug/glow/shaders.gen.js"><\/script> -->
+
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		` + head + "\n	</head>\n	<body>\n		<div>" + body2 + "</div>\n	</body>\n</html>\n";
 var read = null;
 set_paths({ "base": "", "assets": "" });
 var Server = class {
