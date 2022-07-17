@@ -9,12 +9,13 @@
 	import { srcStore } from '../stores/codeSrc.js';
 	import { prefsStore } from '../stores/prefs.js';
 	import { base } from '$app/paths';
-	import { googleClient } from '../services/google-service';
-	import { currentUser, handelAuthIn, handleSignOut } from '../services/auth-service';
+	import { currentUser, handleAuthClick, handleSignoutClick } from '../services/auth-service';
 
 	let gapiCalled = false;
 	let fileRead = false;
 	let docid = '';
+	let driveLoaded = false;
+	let pickLoaded = false;
 	const driveUploadPath = 'https://www.googleapis.com/upload/drive/v3/files';
 	// @ts-ignore
 	let divEl: HTMLDivElement | null = null;
@@ -31,11 +32,24 @@
 		}
 	});
 
-	const readFileIntoEditor = () => {
+	prefsStore.subscribe((prefs) => {
+		if (mounted && prefs.last_doc_id.length > 0 && prefs.last_doc_id !== docid) {
+			docid = prefs.last_doc_id;
+			loadFileIntoSrcStore(docid);
+		}
+	});
+
+	const loadFileIntoSrcStore = async (docid: string) => {
 		console.log('in reading file into editor', docid);
-		readFile(docid, (body) => {
-			srcStore.set(body);
-		});
+		if (driveLoaded) {
+			await readFile(docid, (body) => {
+				srcStore.set(body);
+				editor.setValue(body);
+				savedComment = '';
+			});
+		} else {
+			console.log('drive not loaded, cannot read file');
+		}
 	};
 
 	const saveFile = () => {
@@ -44,7 +58,7 @@
 		updateFile(docid, $srcStore);
 	};
 
-	function readFile(fileId, callback) {
+	async function readFile(fileId, callback) {
 		var request = gapi.client.drive.files.get({
 			fileId: fileId,
 			alt: 'media'
@@ -68,6 +82,9 @@
 					path: driveUploadPath + '/' + driveId,
 					method: 'PATCH',
 					params: { uploadType: 'media' },
+					headers: {
+						'Content-Type': 'text/plain'
+					},
 					body: $srcStore
 				})
 				.then((response) => {
@@ -81,20 +98,52 @@
 		});
 	}
 
+	function createPicker() {
+		editor.setValue('');
+		const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
+		//view.setMimeTypes('text/plain');
+		view.setIncludeFolders(true);
+		view.setQuery('*.py');
+		const picker = new google.picker.PickerBuilder()
+			.setDeveloperKey(import.meta.env.VITE_GOOGLE_API_KEY)
+			.setAppId(import.meta.env.VITE_GOOGLE_APP_ID)
+			.setOAuthToken($currentUser.token)
+			.addView(view)
+			.setCallback(pickerCallback)
+			.build();
+		picker.setVisible(true);
+	}
+
+	/**
+	 * Displays the file details of the user's selection.
+	 * @param {object} data - Containers the user selection from the picker
+	 */
+	function pickerCallback(data) {
+		if (data.action === google.picker.Action.PICKED) {
+			prefsStore.set({ ...$prefsStore, last_doc_id: data.docs[0].id });
+		}
+	}
+
 	function handleClientLoad() {
 		if (!gapiCalled) {
-			console.log('lib loaded');
-			gapi.load('client:auth2', googleClient);
+			console.log('lib loading');
 			gapi.load('client', function () {
-				gapi.client.load('drive', 'v2', function () {
+				console.log('client loaded, loading drive');
+				gapi.client.load('drive', 'v3', function () {
 					console.log('drive loaded');
-					gapiCalled = true;
-					if (gapiCalled && docid && !fileRead) {
-						foo();
-					} else {
-						console.log('gapi is ready but docid is not ready');
-					}
+					driveLoaded = true;
 				});
+				console.log('loading picker');
+				gapi.load(
+					'picker',
+					() => {
+						console.log('picker loaded');
+						pickLoaded = true;
+					},
+					() => {
+						console.log('picker failed to load');
+					}
+				);
 			});
 		}
 	}
@@ -124,7 +173,25 @@
 			}
 		};
 
+		if (!gapiCalled) {
+			await handleClientLoad();
+		}
+
+		const params = new URLSearchParams(window.location.search);
+		console.log(params.get('docid'));
+
+		if (params.get('docid')) {
+			const paramDocid = params.get('docid') as string;
+			if (paramDocid !== docid) {
+				prefsStore.set({ ...$prefsStore, last_doc_id: paramDocid });
+			}
+		} else if ($prefsStore.last_doc_id?.length > 0) {
+			docid = $prefsStore.last_doc_id;
+			loadFileIntoSrcStore(docid);
+		}
+
 		Monaco = await import('monaco-editor');
+
 		editor = Monaco.editor.create(<HTMLElement>divEl, {
 			value: $srcStore,
 			language: 'python',
@@ -139,36 +206,13 @@
 		mounted = true;
 		console.log('Mounted!');
 
-		if (!gapiCalled) {
-			handleClientLoad();
-		}
-
-		const params = new URLSearchParams(window.location.search);
-		console.log(params.get('docid'));
-		if (params.get('docid')) {
-			docid = params.get('docid');
-			prefsStore.set({ ...$prefsStore, last_doc_id: docid });
-			if (gapiCalled && docid && !fileRead) {
-				readFileIntoEditor();
-			} else {
-				console.log('docid is ready, but gapi is not ready');
-			}
-		} else if ($prefsStore.last_doc_id.length > 0) {
-			docid = $prefsStore.last_doc_id;
-			if (gapiCalled && docid && !fileRead) {
-				readFileIntoEditor();
-			} else {
-				console.log('docid is ready, but gapi is not ready');
-			}
-		}
-
 		return () => {
 			editor.dispose();
 		};
 	});
 </script>
 
-<a href="{base}/run">Run this program</a>
+<a href="{base}/run" target="_blank">Run this program</a>
 <input
 	type="checkbox"
 	name="default includes"
@@ -189,12 +233,13 @@ Apply Default Imports
 
 {#if $currentUser}
 	<div>
-		<h4>Logged in as: {$currentUser.name}</h4>
-		<button on:click={handleSignOut}>Logout</button>
+		<h4>Logged in</h4>
+		<button on:click={handleSignoutClick}>Logout</button>
+		<button on:click={createPicker}>Open File</button>
 	</div>
 {:else}
 	<span>No user</span>
-	<button on:click={handelAuthIn}>Login</button>
+	<button on:click={() => handleAuthClick()}>Login</button>
 {/if}
 
 <div class="remainder">
@@ -203,6 +248,7 @@ Apply Default Imports
 
 <svelte:head>
 	<script async defer src="https://apis.google.com/js/api.js"></script>
+	<script async defer src="https://accounts.google.com/gsi/client"></script>
 </svelte:head>
 
 <style>

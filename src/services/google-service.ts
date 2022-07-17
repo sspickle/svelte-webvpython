@@ -1,7 +1,7 @@
 import { setCurrentUser } from './auth-service';
 
 const SCOPES =
-	'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata https://www.googleapis.com/auth/drive';
+	'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.metadata.readonly';
 
 export async function googleClient() {
 	await gapi.client.init({
