@@ -40,6 +40,7 @@ export function handleSignoutClick() {
 	if (accessToken) {
 		accessToken = null;
 		google.accounts.oauth2.revoke(accessToken);
+		setCurrentUser();
 	}
 }
 

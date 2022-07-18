@@ -11,44 +11,57 @@
 	import { base } from '$app/paths';
 	import { currentUser, handleAuthClick, handleSignoutClick } from '../services/auth-service';
 
-	let gapiCalled = false;
 	let fileRead = false;
 	let docid = '';
-	let driveLoaded = false;
-	let pickLoaded = false;
 	const driveUploadPath = 'https://www.googleapis.com/upload/drive/v3/files';
 	// @ts-ignore
 	let divEl: HTMLDivElement | null = null;
 	let editor: monaco.editor.IStandaloneCodeEditor;
 	let Monaco;
 	let mounted = false;
+	let idloaded = '';
+	let driveLoaded = false;
+	let pickLoaded = false;
+
+	$: {
+		console.log('checking all three', driveLoaded, pickLoaded, docid.length);
+		if (driveLoaded && pickLoaded && docid.length > 0) {
+			console.log('all set,load docid', docid);
+			loadFileIntoSrcStore(docid);
+		}
+	}
+
 	let savedComment = '';
 
 	currentUser.subscribe((user) => {
 		if (user) {
-			if (gapiCalled && docid && !fileRead) {
-				readFileIntoEditor();
+			if (docid.length > 0 && (idloaded.length == 0 || idloaded != docid)) {
+				loadFileIntoSrcStore(docid);
 			}
 		}
 	});
 
 	prefsStore.subscribe((prefs) => {
-		if (mounted && prefs.last_doc_id.length > 0 && prefs.last_doc_id !== docid) {
+		console.log('checking prefs', prefs, 'docid', docid, 'prefsDocID', prefs.last_doc_id);
+		if (prefs.last_doc_id.length > 0 && prefs.last_doc_id !== docid) {
 			docid = prefs.last_doc_id;
-			loadFileIntoSrcStore(docid);
 		}
 	});
 
 	const loadFileIntoSrcStore = async (docid: string) => {
 		console.log('in reading file into editor', docid);
-		if (driveLoaded) {
+		debugger;
+		savedComment = 'loading file...';
+		try {
 			await readFile(docid, (body) => {
 				srcStore.set(body);
 				editor.setValue(body);
+				idloaded = docid;
 				savedComment = '';
 			});
-		} else {
-			console.log('drive not loaded, cannot read file');
+		} catch (e) {
+			console.log('error reading file', e);
+			savedComment = 'Error reading file, maybe log in?';
 		}
 	};
 
@@ -125,27 +138,32 @@
 	}
 
 	function handleClientLoad() {
-		if (!gapiCalled) {
-			console.log('lib loading');
-			gapi.load('client', function () {
-				console.log('client loaded, loading drive');
-				gapi.client.load('drive', 'v3', function () {
+		console.log('lib loading');
+		gapi.load('client', function () {
+			console.log('client loaded, loading drive');
+			gapi.client.load(
+				'drive',
+				'v3',
+				function () {
 					console.log('drive loaded');
 					driveLoaded = true;
-				});
-				console.log('loading picker');
-				gapi.load(
-					'picker',
-					() => {
-						console.log('picker loaded');
-						pickLoaded = true;
-					},
-					() => {
-						console.log('picker failed to load');
-					}
-				);
-			});
-		}
+				},
+				function () {
+					console.log('drive load failed');
+				}
+			);
+			console.log('loading picker');
+			gapi.load(
+				'picker',
+				() => {
+					console.log('picker loaded');
+					pickLoaded = true;
+				},
+				() => {
+					console.log('picker failed to load');
+				}
+			);
+		});
 	}
 
 	let toggleDefaultImports = () => {
@@ -155,6 +173,7 @@
 
 	onMount(async () => {
 		// @ts-ignore
+		console.log('mounting...');
 		self.MonacoEnvironment = {
 			getWorker: function (_moduleId: any, label: string) {
 				if (label === 'json') {
@@ -173,21 +192,19 @@
 			}
 		};
 
-		if (!gapiCalled) {
-			await handleClientLoad();
-		}
+		handleClientLoad();
 
 		const params = new URLSearchParams(window.location.search);
-		console.log(params.get('docid'));
 
 		if (params.get('docid')) {
 			const paramDocid = params.get('docid') as string;
+			console.log('paramDocId', paramDocid);
 			if (paramDocid !== docid) {
+				console.log('setting perfStore docid', paramDocid);
 				prefsStore.set({ ...$prefsStore, last_doc_id: paramDocid });
 			}
 		} else if ($prefsStore.last_doc_id?.length > 0) {
 			docid = $prefsStore.last_doc_id;
-			loadFileIntoSrcStore(docid);
 		}
 
 		Monaco = await import('monaco-editor');
@@ -212,6 +229,8 @@
 	});
 </script>
 
+<!-- {@debug docid, mounted, driveLoaded, pickLoaded} -->
+
 <a href="{base}/run" target="_blank">Run this program</a>
 <input
 	type="checkbox"
@@ -223,22 +242,22 @@
 />
 Apply Default Imports
 
-{#if docid.length > 0 && $currentUser}
+{#if docid.length > 0}
 	<button on:click={saveFile}>Save</button>
-
-	<span>Currently editing: gid: {docid} </span>
-
+	{#if docid === idloaded}
+		<span>(Currently viewing: file: {docid}) </span>
+	{:else}
+		<span>wait for file to load</span>
+	{/if}
 	<span>{savedComment}</span>
 {/if}
 
 {#if $currentUser}
 	<div>
-		<h4>Logged in</h4>
 		<button on:click={handleSignoutClick}>Logout</button>
 		<button on:click={createPicker}>Open File</button>
 	</div>
 {:else}
-	<span>No user</span>
 	<button on:click={() => handleAuthClick()}>Login</button>
 {/if}
 
