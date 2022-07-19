@@ -7,7 +7,7 @@
 	let display_picked: string | null = null;
 	export let authCallback: ((signedIn: boolean) => void) | null = null;
 	export let SCOPES: string = 'email';
-	export let notifyMe: (dinfo: any) => void;
+	export let picked_doc_id: string | null = null;
 
 	const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 	const APP_ID = import.meta.env.VITE_GOOGLE_APP_ID;
@@ -95,7 +95,7 @@
 	 */
 	function pickerCallback(data) {
 		if (data.action === google.picker.Action.PICKED) {
-			notifyMe(data.docs);
+			picked_doc_id = data.docs[0].id;
 		}
 	}
 </script>

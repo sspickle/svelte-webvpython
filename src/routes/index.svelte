@@ -15,6 +15,7 @@
 		'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.metadata.readonly';
 
 	let docid = '';
+	let picked_doc_id = '';
 	let docMeta = null;
 	const driveUploadPath = 'https://www.googleapis.com/upload/drive/v3/files';
 
@@ -30,6 +31,11 @@
 	let pickLoaded = false;
 	let runLink: HTMLAnchorElement | null = null;
 	let savedComment = '';
+
+	$: if (picked_doc_id.length > 0) {
+		prefsStore.set({ ...$prefsStore, last_doc_id: picked_doc_id });
+		picked_doc_id = '';
+	}
 
 	$: {
 		console.log('checking all three', driveLoaded, pickLoaded, docid.length);
@@ -53,7 +59,8 @@
 	}
 
 	const notifyMeFilePicked = (dinfo: any) => {
-		docid = dinfo[0].id;
+		window.location.search = '';
+		prefsStore.set({ ...$prefsStore, last_doc_id: dinfo[0].id });
 	};
 
 	prefsStore.subscribe((prefs) => {
@@ -104,6 +111,7 @@
 		});
 		request.then(function (response) {
 			docMeta = response.result;
+			console.log('loaded metadata for:', docMeta.name);
 		});
 	}
 
@@ -269,7 +277,7 @@ Apply Default Imports
 {/if}
 
 <GoogleButton
-	notifyMe={notifyMeFilePicked}
+	bind:picked_doc_id
 	bind:auth_token
 	bind:isSignedIn
 	authCallback={authChanged}
@@ -289,7 +297,7 @@ Apply Default Imports
 	.remainder {
 		display: flex;
 		flex-direction: column;
-		height: 80vh;
+		height: 100vh;
 		margin: 0;
 	}
 
