@@ -22,6 +22,7 @@
 	let idloaded = '';
 	let driveLoaded = false;
 	let pickLoaded = false;
+	let runLink = <HTMLAnchorElement>null;
 
 	$: {
 		console.log('checking all three', driveLoaded, pickLoaded, docid.length);
@@ -50,7 +51,6 @@
 
 	const loadFileIntoSrcStore = async (docid: string) => {
 		console.log('in reading file into editor', docid);
-		debugger;
 		savedComment = 'loading file...';
 		try {
 			await readFile(docid, (body) => {
@@ -174,6 +174,22 @@
 	onMount(async () => {
 		// @ts-ignore
 		console.log('mounting...');
+		document.addEventListener('visibilitychange', (event) => {
+			// when tab becomes active, set focus on the editor
+			if (document.visibilityState == 'visible') {
+				editor.focus();
+			}
+		});
+
+		document.onkeydown = (e) => {
+			if (e.key === 'm' && e.ctrlKey) {
+				e.preventDefault();
+				if (runLink) {
+					runLink.click();
+				}
+			}
+		};
+
 		self.MonacoEnvironment = {
 			getWorker: function (_moduleId: any, label: string) {
 				if (label === 'json') {
@@ -231,7 +247,7 @@
 
 <!-- {@debug docid, mounted, driveLoaded, pickLoaded} -->
 
-<a href="{base}/run" target="_blank">Run this program</a>
+<a bind:this={runLink} href="{base}/run" target="_blank">Run this program</a>
 <input
 	type="checkbox"
 	name="default includes"

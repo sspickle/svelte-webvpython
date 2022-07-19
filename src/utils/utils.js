@@ -1,7 +1,5 @@
 export const getPyodide = async (stdOutRedir, stdErrRedir, url) => {
-	console.log('loading prep');
 	const pkgResponse = fetch('vpython.zip').then((x) => x.arrayBuffer());
-	console.log(stdErrRedir, stdOutRedir);
 	let pyodide;
 	try {
 		pyodide = await loadPyodide({

@@ -282,19 +282,31 @@ class extrusion(glowProxy):
 
 class graph(glowProxy):
     def __init__(self, *args, **kwargs):
-        glowProxy.__init__(self, oType='graph', factory=js_graph, *args, **kwargs)
+        glowProxy.__init__(self, oType='graph', listAttrs=['data','pos'], factory=js_graph, *args, **kwargs)
 
-class gcurve(glowProxy):
+class graphPlotter(glowProxy):
     def __init__(self, *args, **kwargs):
-        glowProxy.__init__(self, oType='gcurve', vecAttrs=['color','marker_color','dot_color'], factory=js_gcurve, *args, **kwargs)
+        glowProxy.__init__(self, *args, **kwargs)
 
-class gvbars(glowProxy):
-    def __init__(self, *args, **kwargs):
-        glowProxy.__init__(self, oType='gvbars', vecAttrs=['color','marker_color'], factory=js_gvbars, *args, **kwargs)
+    def plot(self, *args, **kwargs):
+        kwargs = translate_kwargs_lists(kwargs, self.listAttrs)
+        self.jsObj.plot(*args, **kwargs)
 
-class gdots(glowProxy):
+class gcurve(graphPlotter):
     def __init__(self, *args, **kwargs):
-        glowProxy.__init__(self, oType='gdots', vecAttrs=['color','marker_color'], factory=js_gdots, *args, **kwargs)
+        graphPlotter.__init__(self, oType='gcurve', vecAttrs=['color','marker_color','dot_color'], listAttrs=['data','pos'], factory=js_gcurve, *args, **kwargs)
+
+class gvbars(graphPlotter):
+    def __init__(self, *args, **kwargs):
+        graphPlotter.__init__(self, oType='gvbars', vecAttrs=['color','marker_color'], listAttrs=['data','pos'], factory=js_gvbars, *args, **kwargs)
+
+class ghbars(graphPlotter):
+    def __init__(self, *args, **kwargs):
+        graphPlotter.__init__(self, oType='gdots', vecAttrs=['color','marker_color'], listAttrs=['data','pos'],factory=js_gdots, *args, **kwargs)
+
+class gdots(graphPlotter):
+    def __init__(self, *args, **kwargs):
+        graphPlotter.__init__(self, oType='gdots', vecAttrs=['color','marker_color'], listAttrs=['data','pos'],factory=js_gdots, *args, **kwargs)
 
 class triangle(glowProxy):
     def __init__(self, *args, **kwargs):
