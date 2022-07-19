@@ -9,12 +9,18 @@
 	import { srcStore } from '../stores/codeSrc.js';
 	import { prefsStore } from '../stores/prefs.js';
 	import { base } from '$app/paths';
-	import { currentUser, handleAuthClick, handleSignoutClick } from '../services/auth-service';
+	import GoogleButton from '../components/googleButton.svelte';
+	import { doAuthorize } from '../utils/doAuthorize.js';
+	const SCOPES =
+		'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.metadata.readonly';
 
-	let fileRead = false;
 	let docid = '';
+	let docMeta = null;
 	const driveUploadPath = 'https://www.googleapis.com/upload/drive/v3/files';
-	// @ts-ignore
+
+	let auth_token: string = '';
+	let isSignedIn: boolean = false;
+
 	let divEl: HTMLDivElement | null = null;
 	let editor: monaco.editor.IStandaloneCodeEditor;
 	let Monaco;
@@ -22,25 +28,33 @@
 	let idloaded = '';
 	let driveLoaded = false;
 	let pickLoaded = false;
-	let runLink = <HTMLAnchorElement>null;
+	let runLink: HTMLAnchorElement | null = null;
+	let savedComment = '';
 
 	$: {
 		console.log('checking all three', driveLoaded, pickLoaded, docid.length);
-		if (driveLoaded && pickLoaded && docid.length > 0) {
-			console.log('all set,load docid', docid);
-			loadFileIntoSrcStore(docid);
-		}
-	}
-
-	let savedComment = '';
-
-	currentUser.subscribe((user) => {
-		if (user) {
-			if (docid.length > 0 && (idloaded.length == 0 || idloaded != docid)) {
+		if (driveLoaded && pickLoaded && docid.length > 0 && isSignedIn && idloaded !== docid) {
+			if (!auth_token) {
+				doAuthorize((token: string) => {
+					auth_token = token;
+					loadFileIntoSrcStore(docid);
+				}, SCOPES);
+			} else {
 				loadFileIntoSrcStore(docid);
 			}
 		}
-	});
+	}
+
+	function authChanged(isSignedIn: boolean) {
+		console.log('authChanged', isSignedIn);
+		if (!isSignedIn) {
+			auth_token = '';
+		}
+	}
+
+	const notifyMeFilePicked = (dinfo: any) => {
+		docid = dinfo[0].id;
+	};
 
 	prefsStore.subscribe((prefs) => {
 		console.log('checking prefs', prefs, 'docid', docid, 'prefsDocID', prefs.last_doc_id);
@@ -72,20 +86,25 @@
 	};
 
 	async function readFile(fileId, callback) {
-		var request = gapi.client.drive.files.get({
+		let request = gapi.client.drive.files.get({
 			fileId: fileId,
 			alt: 'media'
 		});
 		request.then(
 			function (response) {
-				console.log(response); //response.body contains the string value of the file
 				if (typeof callback === 'function') callback(response.body);
 			},
 			function (error) {
 				console.log(error);
 			}
 		);
-		return request;
+		request = gapi.client.drive.files.get({
+			fileId: fileId,
+			fields: '*'
+		});
+		request.then(function (response) {
+			docMeta = response.result;
+		});
 	}
 
 	function updateFile(driveId, newData) {
@@ -109,32 +128,6 @@
 					savedComment = '(error!)';
 				});
 		});
-	}
-
-	function createPicker() {
-		editor.setValue('');
-		const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
-		//view.setMimeTypes('text/plain');
-		view.setIncludeFolders(true);
-		view.setQuery('*.py');
-		const picker = new google.picker.PickerBuilder()
-			.setDeveloperKey(import.meta.env.VITE_GOOGLE_API_KEY)
-			.setAppId(import.meta.env.VITE_GOOGLE_APP_ID)
-			.setOAuthToken($currentUser.token)
-			.addView(view)
-			.setCallback(pickerCallback)
-			.build();
-		picker.setVisible(true);
-	}
-
-	/**
-	 * Displays the file details of the user's selection.
-	 * @param {object} data - Containers the user selection from the picker
-	 */
-	function pickerCallback(data) {
-		if (data.action === google.picker.Action.PICKED) {
-			prefsStore.set({ ...$prefsStore, last_doc_id: data.docs[0].id });
-		}
 	}
 
 	function handleClientLoad() {
@@ -261,21 +254,27 @@ Apply Default Imports
 {#if docid.length > 0}
 	<button on:click={saveFile}>Save</button>
 	{#if docid === idloaded}
-		<span>(Currently viewing: file: {docid}) </span>
+		<span
+			>(Currently viewing: file:
+			{#if docMeta}
+				{docMeta.name}
+			{:else}
+				{docid}
+			{/if})
+		</span>
 	{:else}
 		<span>wait for file to load</span>
 	{/if}
 	<span>{savedComment}</span>
 {/if}
 
-{#if $currentUser}
-	<div>
-		<button on:click={handleSignoutClick}>Logout</button>
-		<button on:click={createPicker}>Open File</button>
-	</div>
-{:else}
-	<button on:click={() => handleAuthClick()}>Login</button>
-{/if}
+<GoogleButton
+	notifyMe={notifyMeFilePicked}
+	bind:auth_token
+	bind:isSignedIn
+	authCallback={authChanged}
+	{SCOPES}
+/>
 
 <div class="remainder">
 	<div class="editor" id="editor" bind:this={divEl} />
@@ -283,7 +282,7 @@ Apply Default Imports
 
 <svelte:head>
 	<script async defer src="https://apis.google.com/js/api.js"></script>
-	<script async defer src="https://accounts.google.com/gsi/client"></script>
+	<!--	<script async defer src="https://accounts.google.com/gsi/client"></script> -->
 </svelte:head>
 
 <style>
