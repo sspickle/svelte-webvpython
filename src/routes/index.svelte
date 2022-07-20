@@ -188,6 +188,12 @@ Apply Default Imports
 		{/if})
 	</span>
 	<span>{savedComment}</span>
+	<button
+		on:click={() =>
+			navigator.clipboard.writeText(
+				window.location.toString().split('?')[0] + '?docid=' + loaded_doc
+			)}>Copy Link</button
+	>
 {/if}
 
 <GoogleButton {SCOPES} bind:isSignedIn />
