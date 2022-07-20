@@ -7,6 +7,7 @@
 	export let isSignedIn = false;
 	export let authCallback: ((signedIn: boolean) => void) | null = null;
 	export let SCOPES: string = 'email';
+	export let signInPending: boolean = false;
 
 	let auth: any;
 	let display_picked: string | null = null;
@@ -14,6 +15,11 @@
 	const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 	const APP_ID = import.meta.env.VITE_GOOGLE_APP_ID;
 	const DEV_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+
+	$:{ if (signInPending && auth) {
+		auth.signIn();
+		signInPending = false;
+	}}
 
 	const handleAuthChange = () => {
 		isSignedIn = auth.isSignedIn.get();

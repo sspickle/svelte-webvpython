@@ -26,12 +26,15 @@
 	let Monaco;
 	let runLink: HTMLAnchorElement | null = null;
 	let loaded_doc = '';
+	let signInPending: boolean = false;
 
 	let savedComment = '';
 
 	let unsubscribe = cloudDocStore.subscribe((currDocStore: ICloudDocStore) => {
 		if (currDocStore.doc_id != loaded_doc) {
 			loadFileIntoSrcStore(currDocStore.doc_id);
+		} else if (currDocStore.signInPending) {
+			signInPending = true;
 		}
 	});
 
@@ -106,6 +109,18 @@
 		prefsStore.set({ ...$prefsStore, add_default_imports: newUseDefaults });
 	};
 
+	let authCallback = (isSignedIn: boolean) => {
+		isSignedIn = isSignedIn;
+		console.log('got signed in:', isSignedIn);
+		if (isSignedIn) {
+			signInPending = false;
+		} else {
+			loaded_doc = '';
+			docMeta = null;
+		}
+		cloudDocStore.setSignedIn(isSignedIn);
+	};
+
 	onMount(async () => {
 		// @ts-ignore
 		document.addEventListener('visibilitychange', (event) => {
@@ -145,6 +160,7 @@
 		const params = new URLSearchParams(window.location.search);
 		if (params.has('docid')) {
 			cloudDocStore.setParamId(<string>params.get('docid'));
+			console.log('got param id', <string>params.get('docid'));
 		}
 
 		Monaco = await import('monaco-editor');
@@ -196,7 +212,7 @@ Apply Default Imports
 	>
 {/if}
 
-<GoogleButton {SCOPES} bind:isSignedIn />
+<GoogleButton {SCOPES} bind:isSignedIn bind:signInPending {authCallback} />
 
 <div class="remainder">
 	<div class="editor" id="editor" bind:this={divEl} />

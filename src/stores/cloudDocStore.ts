@@ -1,26 +1,39 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
 export interface ICloudDocStore {
 	auth_token: string;
 	doc_id: string;
+	signInPending: boolean;
 }
 
 const defaultDocStore: ICloudDocStore = {
 	auth_token: '',
-	doc_id: ''
+	doc_id: '',
+	signInPending: false
 };
 
 class StoreLogic {
 	pickedDoc = ''; // the docId that was picked
 	paramDoc = ''; // the docId from the url
-	readyDoc = ''; // ready to read the doc
 	authToken = ''; // the auth token for reading
 	pickLoaded = false; // was the pick lib loaded yet?
 	driveLoaded = false; // was the drive lib loaded yet?
+	signedIn = false;
+	signInPending = false;
 
 	setPicked(doc: string) {
 		this.pickedDoc = doc;
 		this.checkDocId();
+	}
+
+	setSignedIn(signedIn: boolean) {
+		this.signedIn = signedIn;
+		if (signedIn) {
+			this.checkDocId();
+		} else if (!this.signInPending) {
+			this.paramDoc = '';
+			this.pickedDoc = '';
+		}
 	}
 
 	setParam(doc: string) {
@@ -34,14 +47,22 @@ class StoreLogic {
 	}
 
 	checkDocId() {
-		if (this.paramDoc.length > 0 && this.pickLoaded && this.driveLoaded) {
+		if (this.paramDoc.length > 0 && !this.signedIn) {
+			console.log('checkDocId: paramDoc but not signed in.. setting signin pending');
+			update((curr: ICloudDocStore) => ({ ...curr, signInPending: true }));
+			this.signInPending = true;
+		}
+
+		if (this.paramDoc.length > 0 && this.pickLoaded && this.driveLoaded && this.signedIn) {
 			// we have a param doc, and everything else is ready, go ahead and set the doc to that
-			update((curr: ICloudDocStore) => ({ ...curr, doc_id: this.paramDoc })); // update the store
+			update((curr: ICloudDocStore) => ({ ...curr, doc_id: this.paramDoc, signInPending: false })); // update the store
 			this.paramDoc = '';
-		} else if (this.pickedDoc.length > 0 && this.pickLoaded && this.driveLoaded) {
+			this.signInPending = false;
+		} else if (this.pickedDoc.length > 0 && this.pickLoaded && this.driveLoaded && this.signedIn) {
 			// we have a picked doc, and everything else is ready, go ahead and set the doc to that
-			update((curr: ICloudDocStore) => ({ ...curr, doc_id: this.pickedDoc })); // update the store
+			update((curr: ICloudDocStore) => ({ ...curr, doc_id: this.pickedDoc, signInPending: false })); // update the store
 			this.pickedDoc = '';
+			this.signInPending = false;
 		}
 	}
 
@@ -77,6 +98,9 @@ function createStore() {
 		},
 		setAuthId: (auth_token: string) => {
 			storeLogic.setAuthId(auth_token);
+		},
+		setSignedIn: (signedIn: boolean) => {
+			storeLogic.setSignedIn(signedIn);
 		}
 	};
 }
