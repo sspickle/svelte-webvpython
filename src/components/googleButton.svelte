@@ -27,8 +27,7 @@
 
 	function checkAuthAndPick() {
 		if ($cloudDocStore.auth_token.length === 0) {
-			doAuthorize(SCOPES, (token: string) => {
-				cloudDocStore.setAuthId(token);
+			doAuthorize(SCOPES, () => {
 				createPicker();
 			});
 		} else {
