@@ -1,7 +1,10 @@
-export const doAuthorize = (cb, SCOPES) => {
+import { cloudDocStore } from '../stores/cloudDocStore';
+
+export const doAuthorize = (SCOPES) => {
 	const handleCB = (authResult) => {
+		console.log('in auth result...', JSON.stringify(authResult, null, 2));
 		if (authResult && !authResult.error) {
-			cb(authResult.access_token);
+			cloudDocStore.setAuthId(authResult.access_token);
 		}
 	};
 

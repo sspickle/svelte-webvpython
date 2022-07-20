@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { doAuthorize } from '../utils/doAuthorize.js';
+	import { browser } from '$app/env';
+	import { cloudDocStore } from '../stores/cloudDocStore';
+	import { onDestroy } from 'svelte';
+
 	export let isSignedIn = false;
-	let auth: any;
-	export let auth_token: string | null = null;
-	let display_picked: string | null = null;
 	export let authCallback: ((signedIn: boolean) => void) | null = null;
 	export let SCOPES: string = 'email';
-	export let picked_doc_id: string | null = null;
+
+	let auth: any;
+	let display_picked: string | null = null;
 
 	const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 	const APP_ID = import.meta.env.VITE_GOOGLE_APP_ID;
@@ -15,9 +17,8 @@
 
 	const handleAuthChange = () => {
 		isSignedIn = auth.isSignedIn.get();
-		console.log('isSignedIn', isSignedIn);
 		if (!isSignedIn) {
-			auth_token = null;
+			cloudDocStore.setAuthId('');
 		}
 		if (authCallback) {
 			authCallback(isSignedIn);
@@ -25,9 +26,9 @@
 	};
 
 	function checkAuthAndPick() {
-		if (!auth_token) {
-			doAuthorize((token: string) => {
-				auth_token = token;
+		if ($cloudDocStore.auth_token.length === 0) {
+			doAuthorize(SCOPES, (token: string) => {
+				cloudDocStore.setAuthId(token);
 				createPicker();
 			});
 		} else {
@@ -35,53 +36,13 @@
 		}
 	}
 
-	onMount(() => {
-		gapi.load('client:auth2', () => {
-			gapi.client
-				.init({
-					clientId: CLIENT_ID,
-					scope: SCOPES
-				})
-				.then(() => {
-					auth = window.gapi.auth2.getAuthInstance();
-					console.log('we have auth now');
-					handleAuthChange();
-					auth.isSignedIn.listen(handleAuthChange);
-				})
-				.catch((err) => {
-					console.log('error', err);
-				});
-			gapi.client.load(
-				'drive',
-				'v3',
-				function () {
-					console.log('drive loaded');
-				},
-				function () {
-					console.log('drive load failed');
-				}
-			);
-		});
-		gapi.load(
-			'picker',
-			() => {
-				console.log('picker loaded');
-			},
-			() => {
-				console.log('picker failed to load');
-			}
-		);
-	});
-
 	function createPicker() {
 		const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
-		//view.setMimeTypes('text/plain');
 		view.setIncludeFolders(true);
-		view.setQuery('*.py');
 		const picker = new google.picker.PickerBuilder()
 			.setDeveloperKey(DEV_KEY)
 			.setAppId(APP_ID)
-			.setOAuthToken(auth_token)
+			.setOAuthToken($cloudDocStore.auth_token)
 			.addView(view)
 			.setCallback(pickerCallback)
 			.setMaxItems(1)
@@ -95,10 +56,57 @@
 	 */
 	function pickerCallback(data) {
 		if (data.action === google.picker.Action.PICKED) {
-			picked_doc_id = data.docs[0].id;
+			cloudDocStore.setPickedId(data.docs[0].id);
 		}
 	}
+
+	const loadedAPI = async () => {
+		try {
+			await new Promise((res, rej) => {
+					gapi.load("client:auth2", {callback: res, onerror: rej});
+				});
+			
+			await gapi.client.init({
+							clientId: CLIENT_ID,
+							scope: SCOPES
+						});
+			auth = window.gapi.auth2.getAuthInstance();
+			handleAuthChange();
+			auth.isSignedIn.listen(handleAuthChange);
+
+			gapi.load(
+				'picker',
+				() => {
+					cloudDocStore.setPickerLoaded();
+				},
+				() => {
+					console.log('picker failed to load');
+				}
+			);
+
+			gapi.client.load(
+				'drive',
+				'v3', ()=> {
+					console.log("drive loaded");
+					cloudDocStore.setDriveLoaded()
+				}
+			);
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
 </script>
+
+<svelte:head>
+	{#if browser}
+	<script defer async
+		src="https://apis.google.com/js/api.js"
+		on:load={() => {
+			loadedAPI();
+		}}></script>
+	{/if}
+</svelte:head>
 
 {#if isSignedIn}
 	<button on:click={() => auth.signOut()}>Sign out</button>
@@ -110,3 +118,4 @@
 {#if display_picked}
 	<p>{display_picked}</p>
 {/if}
+

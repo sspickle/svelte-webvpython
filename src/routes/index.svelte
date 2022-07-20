@@ -9,75 +9,41 @@
 	import { srcStore } from '../stores/codeSrc.js';
 	import { prefsStore } from '../stores/prefs.js';
 	import { base } from '$app/paths';
-	import GoogleButton from '../components/googleButton.svelte';
-	import { doAuthorize } from '../utils/doAuthorize.js';
+	import { cloudDocStore, type ICloudDocStore } from '../stores/cloudDocStore';
+	import { onDestroy } from 'svelte';
+	import GoogleButton from '../components/GoogleButton.svelte';
+
 	const SCOPES =
 		'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.metadata.readonly';
 
-	let docid = '';
-	let picked_doc_id = '';
-	let docMeta = null;
+	let docMeta: any = null; // metadata for the docid we're editing
 	const driveUploadPath = 'https://www.googleapis.com/upload/drive/v3/files';
 
-	let auth_token: string = '';
 	let isSignedIn: boolean = false;
 
 	let divEl: HTMLDivElement | null = null;
 	let editor: monaco.editor.IStandaloneCodeEditor;
 	let Monaco;
-	let mounted = false;
-	let idloaded = '';
-	let driveLoaded = false;
-	let pickLoaded = false;
 	let runLink: HTMLAnchorElement | null = null;
+	let loaded_doc = '';
+
 	let savedComment = '';
 
-	$: if (picked_doc_id.length > 0) {
-		prefsStore.set({ ...$prefsStore, last_doc_id: picked_doc_id });
-		picked_doc_id = '';
-	}
-
-	$: {
-		console.log('checking all three', driveLoaded, pickLoaded, docid.length);
-		if (driveLoaded && pickLoaded && docid.length > 0 && isSignedIn && idloaded !== docid) {
-			if (!auth_token) {
-				doAuthorize((token: string) => {
-					auth_token = token;
-					loadFileIntoSrcStore(docid);
-				}, SCOPES);
-			} else {
-				loadFileIntoSrcStore(docid);
-			}
-		}
-	}
-
-	function authChanged(isSignedIn: boolean) {
-		console.log('authChanged', isSignedIn);
-		if (!isSignedIn) {
-			auth_token = '';
-		}
-	}
-
-	const notifyMeFilePicked = (dinfo: any) => {
-		window.location.search = '';
-		prefsStore.set({ ...$prefsStore, last_doc_id: dinfo[0].id });
-	};
-
-	prefsStore.subscribe((prefs) => {
-		console.log('checking prefs', prefs, 'docid', docid, 'prefsDocID', prefs.last_doc_id);
-		if (prefs.last_doc_id.length > 0 && prefs.last_doc_id !== docid) {
-			docid = prefs.last_doc_id;
+	let unsubscribe = cloudDocStore.subscribe((currDocStore: ICloudDocStore) => {
+		if (currDocStore.doc_id != loaded_doc) {
+			loadFileIntoSrcStore(currDocStore.doc_id);
 		}
 	});
 
+	onDestroy(unsubscribe);
+
 	const loadFileIntoSrcStore = async (docid: string) => {
-		console.log('in reading file into editor', docid);
 		savedComment = 'loading file...';
 		try {
-			await readFile(docid, (body) => {
+			await readFile(docid, (body: string) => {
 				srcStore.set(body);
 				editor.setValue(body);
-				idloaded = docid;
+				loaded_doc = docid;
 				savedComment = '';
 			});
 		} catch (e) {
@@ -88,11 +54,10 @@
 
 	const saveFile = () => {
 		savedComment = '(saving....)';
-		console.log('in save', docid, $srcStore);
-		updateFile(docid, $srcStore);
+		updateFile(loaded_doc);
 	};
 
-	async function readFile(fileId, callback) {
+	async function readFile(fileId: string, callback: (body: string) => void) {
 		let request = gapi.client.drive.files.get({
 			fileId: fileId,
 			alt: 'media'
@@ -111,11 +76,10 @@
 		});
 		request.then(function (response) {
 			docMeta = response.result;
-			console.log('loaded metadata for:', docMeta.name);
 		});
 	}
 
-	function updateFile(driveId, newData) {
+	function updateFile(driveId: string) {
 		return new Promise((resolve, reject) => {
 			gapi.client
 				.request({
@@ -128,42 +92,12 @@
 					body: $srcStore
 				})
 				.then((response) => {
-					resolve(console.log(response));
 					savedComment = '(saved!)';
 				})
 				.catch((error) => {
 					reject(console.log(error));
 					savedComment = '(error!)';
 				});
-		});
-	}
-
-	function handleClientLoad() {
-		console.log('lib loading');
-		gapi.load('client', function () {
-			console.log('client loaded, loading drive');
-			gapi.client.load(
-				'drive',
-				'v3',
-				function () {
-					console.log('drive loaded');
-					driveLoaded = true;
-				},
-				function () {
-					console.log('drive load failed');
-				}
-			);
-			console.log('loading picker');
-			gapi.load(
-				'picker',
-				() => {
-					console.log('picker loaded');
-					pickLoaded = true;
-				},
-				() => {
-					console.log('picker failed to load');
-				}
-			);
 		});
 	}
 
@@ -174,7 +108,6 @@
 
 	onMount(async () => {
 		// @ts-ignore
-		console.log('mounting...');
 		document.addEventListener('visibilitychange', (event) => {
 			// when tab becomes active, set focus on the editor
 			if (document.visibilityState == 'visible') {
@@ -209,19 +142,9 @@
 			}
 		};
 
-		handleClientLoad();
-
 		const params = new URLSearchParams(window.location.search);
-
-		if (params.get('docid')) {
-			const paramDocid = params.get('docid') as string;
-			console.log('paramDocId', paramDocid);
-			if (paramDocid !== docid) {
-				console.log('setting perfStore docid', paramDocid);
-				prefsStore.set({ ...$prefsStore, last_doc_id: paramDocid });
-			}
-		} else if ($prefsStore.last_doc_id?.length > 0) {
-			docid = $prefsStore.last_doc_id;
+		if (params.has('docid')) {
+			cloudDocStore.setParamId(<string>params.get('docid'));
 		}
 
 		Monaco = await import('monaco-editor');
@@ -237,16 +160,11 @@
 			srcStore.set(editor.getValue());
 		});
 
-		mounted = true;
-		console.log('Mounted!');
-
 		return () => {
 			editor.dispose();
 		};
 	});
 </script>
-
-<!-- {@debug docid, mounted, driveLoaded, pickLoaded} -->
 
 <a bind:this={runLink} href="{base}/run" target="_blank">Run this program</a>
 <input
@@ -259,30 +177,20 @@
 />
 Apply Default Imports
 
-{#if docid.length > 0}
+{#if loaded_doc.length > 0}
 	<button on:click={saveFile}>Save</button>
-	{#if docid === idloaded}
-		<span
-			>(Currently viewing: file:
-			{#if docMeta}
-				{docMeta.name}
-			{:else}
-				{docid}
-			{/if})
-		</span>
-	{:else}
-		<span>wait for file to load</span>
-	{/if}
+	<span
+		>(Currently viewing: file:
+		{#if docMeta}
+			{docMeta.name}
+		{:else}
+			{loaded_doc}
+		{/if})
+	</span>
 	<span>{savedComment}</span>
 {/if}
 
-<GoogleButton
-	bind:picked_doc_id
-	bind:auth_token
-	bind:isSignedIn
-	authCallback={authChanged}
-	{SCOPES}
-/>
+<GoogleButton {SCOPES} bind:isSignedIn />
 
 <div class="remainder">
 	<div class="editor" id="editor" bind:this={divEl} />
