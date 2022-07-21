@@ -1,0 +1,14 @@
+# [START cloudbuild_npm_node]
+steps:
+  # Install dependencies
+  - name: node
+    entrypoint: npm
+    args: ['install']
+  # Run tests
+  - name: node
+    entrypoint: npm
+    args: ['run', 'build']
+  # [END cloudbuild_npm_node]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args: [gcloud app deploy build/app.yaml']

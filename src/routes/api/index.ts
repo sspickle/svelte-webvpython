@@ -1,7 +1,17 @@
 import type { RequestHandler } from './__types/index';
 
-type OutputType = { message: string; rtype: string };
+interface GetResult {
+	CLIENT_ID: string;
+	API_KEY: string;
+}
 
-export const get: RequestHandler<OutputType> = async ({ request }) => {
-	return { body: { message: 'Hello World', rtype: request.method } };
+const defaultResult: GetResult = {
+	CLIENT_ID: '',
+	API_KEY: ''
+};
+
+export const GET: RequestHandler<GetResult> = async ({ request }) => {
+	let result = defaultResult;
+	result = { ...result, CLIENT_ID: JSON.stringify(Object.keys(process.env)) };
+	return { body: result };
 };
