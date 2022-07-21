@@ -3,6 +3,7 @@
 	import { browser } from '$app/env';
 	import { cloudDocStore } from '../stores/cloudDocStore';
 	import { onDestroy } from 'svelte';
+	//import { dev } from "$app/env"
 
 	export let isSignedIn = false;
 	export let authCallback: ((signedIn: boolean) => void) | null = null;
@@ -11,10 +12,11 @@
 
 	let auth: any;
 	let display_picked: string | null = null;
-
-	const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-	const APP_ID = import.meta.env.VITE_GOOGLE_APP_ID;
-	const DEV_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+	const dev = true; // until we can sort out the dev/prod issue
+	
+	const CLIENT_ID = dev ? import.meta.env.VITE_GOOGLE_CLIENT_ID : process.env.CLIENT_ID;
+	const APP_ID = dev ? import.meta.env.VITE_GOOGLE_APP_ID : process.env.APP_ID;
+	const DEV_KEY = dev ? import.meta.env.VITE_GOOGLE_API_KEY: process.env.DEV_KEY;
 
 	$:{ if (signInPending && auth) {
 		auth.signIn();

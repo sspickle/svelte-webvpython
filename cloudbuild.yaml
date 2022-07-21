@@ -8,7 +8,7 @@ steps:
   - name: node
     entrypoint: npm
     args: ['run', 'build']
-  # [END cloudbuild_npm_node]
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args: [gcloud app deploy build/app.yaml']
+  # [END cloudbuild_npm_node], not ready to deploy yet....
+  #  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  #  entrypoint: 'bash'
+  #  args: [gcloud app deploy build/app.yaml']
