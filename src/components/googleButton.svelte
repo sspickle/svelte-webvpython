@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { doAuthorize } from '../utils/doAuthorize.js';
 	import { browser } from '$app/env';
 	import { cloudDocStore } from '../stores/cloudDocStore';
-	import { onDestroy } from 'svelte';
-	//import { dev } from "$app/env"
+	import { onMount } from 'svelte';
+	import { dev } from "$app/env"
 
 	export let isSignedIn = false;
 	export let authCallback: ((signedIn: boolean) => void) | null = null;
@@ -12,15 +11,52 @@
 
 	let auth: any;
 	let display_picked: string | null = null;
-	const dev = true; // until we can sort out the dev/prod issue
+
+	async function postData(url = '', data = {}) {
+	// Default options are marked with *
+		const response = await fetch(url, {
+				method: 'POST', // *GET, POST, PUT, DELETE, etc.
+				mode: 'cors', // no-cors, *cors, same-origin
+				cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+				credentials: 'same-origin', // include, *same-origin, omit
+				headers: {
+					'Content-Type': 'application/json'
+					// 'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				redirect: 'follow', // manual, *follow, error
+				referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+				body: JSON.stringify(data) // body data type must match "Content-Type" header
+			});
+		return response.json(); // parses JSON response into native JavaScript objects
+	}
+
+	let CLIENT_ID:string
+	let API_ID:string
+	let DEV_KEY:string
+
+	let secsLoaded = false;
+	let apiLoaded = false
+
+	const getSecs = async () => {
+		const secs = await postData('/api',{sec:import.meta.env.VITE_DUMB_SECRET});
+		CLIENT_ID = secs.CLIENT_ID;
+		API_ID = secs.APP_ID;
+		DEV_KEY = secs.API_KEY;
+		console.log('keys set')
+		secsLoaded = true;
+	}
 	
-	const CLIENT_ID = dev ? import.meta.env.VITE_GOOGLE_CLIENT_ID : process.env.CLIENT_ID;
-	const APP_ID = dev ? import.meta.env.VITE_GOOGLE_APP_ID : process.env.APP_ID;
-	const DEV_KEY = dev ? import.meta.env.VITE_GOOGLE_API_KEY: process.env.DEV_KEY;
+	onMount(()=>{
+		getSecs();
+	});
 
 	$:{ if (signInPending && auth) {
 		auth.signIn();
 		signInPending = false;
+	}}
+
+	$:{ if (secsLoaded && apiLoaded) {
+		loadedAPI()
 	}}
 
 	const handleAuthChange = () => {
@@ -31,6 +67,25 @@
 		if (authCallback) {
 			authCallback(isSignedIn);
 		}
+	};
+
+	export const doAuthorize = (SCOPES, cb) => {
+	const handleCB = (authResult) => {
+		console.log('in auth result...', JSON.stringify(authResult, null, 2));
+		if (authResult && !authResult.error) {
+			cloudDocStore.setAuthId(authResult.access_token);
+			cb(); // call them back!
+		}
+	};
+
+	gapi.auth.authorize(
+			{
+				client_id: CLIENT_ID,
+				scope: SCOPES,
+				immediate: false
+			},
+			handleCB
+		);
 	};
 
 	function checkAuthAndPick() {
@@ -48,7 +103,7 @@
 		view.setIncludeFolders(true);
 		const picker = new google.picker.PickerBuilder()
 			.setDeveloperKey(DEV_KEY)
-			.setAppId(APP_ID)
+			.setAppId(API_ID)
 			.setOAuthToken($cloudDocStore.auth_token)
 			.addView(view)
 			.setCallback(pickerCallback)
@@ -110,7 +165,7 @@
 	<script defer async
 		src="https://apis.google.com/js/api.js"
 		on:load={() => {
-			loadedAPI();
+			apiLoaded=true;
 		}}></script>
 	{/if}
 </svelte:head>
