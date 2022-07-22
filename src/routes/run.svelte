@@ -77,16 +77,21 @@ from vpython import *
 		}
 	});
 
-	//const substitutions = [[]] // fill this in later... not enough DRY here...
+	const substitutions: (RegExp | string)[][] = [
+		[/[^\.\w\n]rate[\ ]*\(/g, ' await rate('],
+		[/\nrate[\ ]*\(/g, '\nawait rate('],
+		[/scene\.waitfor[\ ]*\(/g, 'await scene.waitfor('],
+		[/[^\.\w\n]get_library[\ ]*\(/g, ' await get_library('],
+		[/\nget_library[\ ]*\(/g, '\nawait get_library(']
+	];
 
 	async function runMe() {
 		try {
 			if (pyodide) {
-				let asyncProgram = program.replace(/[^\.\w\n]rate[\ ]*\(/g, ' await rate('); // replace ` rate(` with `async async_rate(`
-				asyncProgram = asyncProgram.replace(/\nrate[\ ]*\(/g, '\nawait rate('); // replace '\nrate(` with `\nasync async_rate(`
-				asyncProgram = asyncProgram.replace(/scene\.waitfor[\ ]*\(/g, 'await scene.waitfor('); // replace `scene.waitfor(` with `await scene.waitfor(`
-				asyncProgram = asyncProgram.replace(/[^\.\w\n]get_library[\ ]*\(/g, ' await get_library('); // replace `sget_library` with `await get_library(`
-				asyncProgram = asyncProgram.replace(/\nget_library[\ ]*\(/g, '\nawait get_library('); // replace '\nrate(` with `\nasync async_rate(`
+				let asyncProgram = program;
+				for (let i = 0; i < substitutions.length; i++) {
+					asyncProgram = asyncProgram.replace(substitutions[i][0], <string>substitutions[i][1]);
+				}
 
 				if (applyDefaultImports) {
 					await pyodide.loadPackagesFromImports(defaultImportCode);
