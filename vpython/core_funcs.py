@@ -49,7 +49,7 @@ def js_debug(*args, convert=True):
         args = to_js(args)
     js_window.__reportScriptError(args)
 
-async def get_library(url, varname=None):
+async def get_library(url):
     """
     Load a library from a url and then fetch varname from the window object. If you need to convert from native js objec to python, pass in a constructor function.
     """
@@ -58,11 +58,6 @@ async def get_library(url, varname=None):
         await js_get_library(url)
     except Exception as e:
         raise Exception("Error loading library %s: %s" % (url, e))
-
-    if varname is not None:
-        obj = getattr(js_window,varname,None)
-
-    return obj
 
 def translate_kwargs_rest(kwargs, notAttrs):
     # Handle everything else
