@@ -36,9 +36,7 @@ const defaultResult: GetResult = {
 };
 
 export const POST: RequestHandler<GetResult | string> = async ({ request }) => {
-	console.log('in post');
 	const incoming = await request.json();
-	console.log(incoming);
 	if (!incoming['sec'] || incoming['sec'] !== import.meta.env.VITE_DUMB_SECRET) {
 		return {
 			status: 401,
