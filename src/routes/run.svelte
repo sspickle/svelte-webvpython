@@ -77,12 +77,17 @@ from vpython import *
 		}
 	});
 
+	//const substitutions = [[]]
+
 	async function runMe() {
 		try {
 			if (pyodide) {
 				let asyncProgram = program.replace(/[^\.\w\n]rate[\ ]*\(/g, ' await rate('); // replace ` rate(` with `async async_rate(`
-				asyncProgram = asyncProgram.replace(/\n]rate[\ ]*\(/g, '\n await rate('); // replace '\nrate(` with `\nasync async_rate(`
-				asyncProgram = asyncProgram.replace(/scene\.waitfor[\ ]*\(/g, 'await scene.waitfor('); // replace `scene.waitfor(` with `scene.waitfor(`
+				asyncProgram = asyncProgram.replace(/\nrate[\ ]*\(/g, '\nawait rate('); // replace '\nrate(` with `\nasync async_rate(`
+				asyncProgram = asyncProgram.replace(/scene\.waitfor[\ ]*\(/g, 'await scene.waitfor('); // replace `scene.waitfor(` with `await scene.waitfor(`
+				asyncProgram = asyncProgram.replace(/[^\.\w\n]get_library[\ ]*\(/g, ' await get_library('); // replace `sget_library` with `await get_library(`
+				asyncProgram = asyncProgram.replace(/\nget_library[\ ]*\(/g, '\nawait get_library('); // replace '\nrate(` with `\nasync async_rate(`
+
 				if (applyDefaultImports) {
 					await pyodide.loadPackagesFromImports(defaultImportCode);
 					var result = await pyodide.runPythonAsync(defaultImportCode);

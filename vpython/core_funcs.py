@@ -1,10 +1,11 @@
+from signal import raise_signal
 from js import sphere as js_sphere, box as js_box, shapes, paths, vec as js_vec, rate
 from js import cylinder as js_cylinder, arrow as js_arrow, cone as js_cone, helix as js_helix
 from js import label as js_label, scene as js_scene, textures
 from js import pyramid as js_pyramid, ring as js_ring, text as js_text
 from js import button as js_button, distant_light as js_distant_light, local_light as js_local_light
 from js import slider as js_slider, wtext as js_wtext, radio as js_radio, checkbox as js_checkbox
-from js import menu as js_menu, curve as js_curve, Object
+from js import menu as js_menu, curve as js_curve, Object, get_library as js_get_library
 from js import points as js_points, extrusion as js_extrusion, simple_sphere as js_simple_sphere
 from js import window as js_window, fontloading as js_fontloading, waitforfonts as js_waitforfonts
 from js import quad as js_quad, vertex as js_vertex, triangle as js_triangle, ellipsoid as js_ellipsoid
@@ -47,6 +48,21 @@ def js_debug(*args, convert=True):
     if convert:
         args = to_js(args)
     js_window.__reportScriptError(args)
+
+async def get_library(url, varname=None):
+    """
+    Load a library from a url and then fetch varname from the window object. If you need to convert from native js objec to python, pass in a constructor function.
+    """
+    obj = None # maybe return nothing
+    try:
+        await js_get_library(url)
+    except Exception as e:
+        raise Exception("Error loading library %s: %s" % (url, e))
+
+    if varname is not None:
+        obj = getattr(js_window,varname,None)
+
+    return obj
 
 def translate_kwargs_rest(kwargs, notAttrs):
     # Handle everything else
@@ -242,7 +258,7 @@ class text(glowProxy):
 
 class button(glowProxy):
     def __init__(self, *args, **kwargs):
-        glowProxy.__init__(self, funcAttrs=['bind'], oType='button', factory=js_button, *args, **kwargs)
+        glowProxy.__init__(self, funcAttrs=['bind'], vecAttrs=['textcolor','background'], oType='button', factory=js_button, *args, **kwargs)
 
 class slider(glowProxy):
     def __init__(self, *args, **kwargs):
@@ -414,7 +430,9 @@ class points(curveProxy):
 class compound(glowProxy):
     def __init__(self, *args, **kwargs):
         if 'jsObj' in kwargs:
-            return glowProxy.__init__(self, vecAttrs=['pos','axis','color'], *args, oType='compound', factory=js_compound, **kwargs)
+            jsObj = kwargs['jsObj']
+            del kwargs['jsObj']
+            return glowProxy.__init__(self, vecAttrs=['pos','axis','color'], *args, oType='compound', jsObj=jsObj, **kwargs)
         else:
             if len(args) != 1:
                 raise Exception("compound: must have exactly 1 unnamed argument")
