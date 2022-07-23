@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/env';
-	import { cloudDocStore } from '../stores/cloudDocStore';
+	import { cloudDocStore } from '$lib/stores/cloudDocStore';
 	import { onMount } from 'svelte';
 	import { dev } from "$app/env"
 

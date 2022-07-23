@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { stdoutStore } from '../stores/stdoutSrc';
-	import { srcStore } from '../stores/codeSrc';
-	import { prefsStore } from '../stores/prefs';
+	import { stdoutStore } from '$lib/stores/stdoutSrc';
+	import { srcStore } from '$lib/stores/codeSrc';
+	import { prefsStore } from '$lib/stores/prefs';
 	import { onMount } from 'svelte';
-	import { setupGSCanvas, getPyodide } from '../utils/utils';
-	import { base } from '$app/paths';
+	import { setupGSCanvas, getPyodide } from '$lib/utils/utils';
 
 	function redirect_stdout(theText: string) {
 		if (mounted) {

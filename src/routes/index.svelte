@@ -6,12 +6,12 @@
 	import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 	import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 	import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
-	import { srcStore } from '../stores/codeSrc.js';
-	import { prefsStore } from '../stores/prefs.js';
+	import { srcStore } from '$lib/stores/codeSrc.js';
+	import { prefsStore } from '$lib/stores/prefs.js';
 	import { base } from '$app/paths';
-	import { cloudDocStore, type ICloudDocStore } from '../stores/cloudDocStore';
+	import { cloudDocStore, type ICloudDocStore } from '$lib/stores/cloudDocStore';
 	import { onDestroy } from 'svelte';
-	import GoogleButton from '../components/GoogleButton.svelte';
+	import GoogleButton from '$lib/components/GoogleButton.svelte';
 
 	const SCOPES =
 		'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.install';
