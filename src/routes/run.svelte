@@ -4,6 +4,7 @@
 	import { prefsStore } from '$lib/stores/prefs';
 	import { onMount } from 'svelte';
 	import { setupGSCanvas, getPyodide } from '$lib/utils/utils';
+	import { base } from '$app/paths';
 
 	function redirect_stdout(theText: string) {
 		if (mounted) {
@@ -116,6 +117,7 @@ from vpython import *
 	}
 </script>
 
+<a href="{base}/" target="_self">Edit this code</a>
 <h2>Running....</h2>
 <div id="glowscript" class="glowscript" />
 <div><textarea bind:this={stdout} rows="10" cols="80" hidden /></div>

@@ -182,7 +182,7 @@
 	});
 </script>
 
-<a bind:this={runLink} href="{base}/run" target="_blank">Run this program</a>
+<a bind:this={runLink} href="{base}/run" target="_self">Run this program</a>
 <input
 	type="checkbox"
 	name="default includes"

@@ -71,7 +71,6 @@
 
 	export const doAuthorize = (SCOPES, cb) => {
 	const handleCB = (authResult) => {
-		console.log('in auth result...', JSON.stringify(authResult, null, 2));
 		if (authResult && !authResult.error) {
 			cloudDocStore.setAuthId(authResult.access_token);
 			cb(); // call them back!
