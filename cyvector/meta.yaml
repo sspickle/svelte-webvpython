@@ -1,0 +1,9 @@
+package:
+  name: cyvector
+  version: "0.1"
+source:
+  path: cyvector
+test:
+  imports:
+    - cyvector
+

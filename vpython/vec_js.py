@@ -1,5 +1,6 @@
 from js import vec as js_vec
-from .vector import *
+#from .vector import *
+from cyvector import *
 
 # List of names imported from this module with import *
 __all__ = ['vector_js']

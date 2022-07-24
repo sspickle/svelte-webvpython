@@ -11,3 +11,7 @@ node_modules
 /venv
 /__pycache__
 /build
+/cyvector/build
+/cyvector/dist
+*.log
+
