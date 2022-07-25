@@ -35,8 +35,9 @@
 			loadFileIntoSrcStore(currDocStore.doc_id);
 		} else if (currDocStore.signInPending) {
 			signInPending = true;
-		} else if (currDocStore.doc_url) {
+		} else if (currDocStore.doc_url.length > 0) {
 			loadURLIntoDocStore(currDocStore.doc_url);
+			cloudDocStore.setDocURL('');
 		} else {
 			isSignedIn = false;
 		}
