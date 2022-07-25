@@ -2,7 +2,9 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/env';
 
 let defaultPrefs = {
-	add_default_imports: true
+	add_default_imports: true,
+	saved_doc_id: '',
+	saved_doc_name: ''
 };
 
 const localStorageKey = 'prefs';

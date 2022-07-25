@@ -15,6 +15,7 @@ const defaultDocStore: ICloudDocStore = {
 class StoreLogic {
 	pickedDoc = ''; // the docId that was picked
 	paramDoc = ''; // the docId from the url
+	lastDocId = ''; // the docId from local storage
 	authToken = ''; // the auth token for reading
 	pickLoaded = false; // was the pick lib loaded yet?
 	driveLoaded = false; // was the drive lib loaded yet?
@@ -41,6 +42,11 @@ class StoreLogic {
 		this.checkDocId();
 	}
 
+	setLocalDocId(docId: string) {
+		this.lastDocId = docId;
+		this.checkDocId();
+	}
+
 	setAuthId(auth_token: string) {
 		this.authToken = auth_token;
 		update((curr: ICloudDocStore) => ({ ...curr, auth_token: this.authToken })); // update the store
@@ -57,6 +63,11 @@ class StoreLogic {
 			// we have a param doc, and everything else is ready, go ahead and set the doc to that
 			update((curr: ICloudDocStore) => ({ ...curr, doc_id: this.paramDoc, signInPending: false })); // update the store
 			this.paramDoc = '';
+			this.signInPending = false;
+		} else if (this.lastDocId.length > 0 && this.driveLoaded && this.signedIn) {
+			// we have a picked doc, and everything else is ready, go ahead and set the doc to that
+			update((curr: ICloudDocStore) => ({ ...curr, doc_id: this.lastDocId, signInPending: false })); // update the store
+			this.lastDocId = '';
 			this.signInPending = false;
 		} else if (this.pickedDoc.length > 0 && this.pickLoaded && this.driveLoaded && this.signedIn) {
 			// we have a picked doc, and everything else is ready, go ahead and set the doc to that
@@ -89,6 +100,9 @@ function createStore() {
 		},
 		setParamId: (docid: string) => {
 			storeLogic.setParam(docid);
+		},
+		setLocalDocId: (docid: string) => {
+			storeLogic.setLocalDocId(docid);
 		},
 		setDriveLoaded: () => {
 			storeLogic.setDriveLoaded(true);

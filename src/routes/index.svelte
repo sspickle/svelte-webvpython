@@ -49,6 +49,7 @@
 				loaded_doc = docid;
 				savedComment = '';
 			});
+			prefsStore.update((prefs) => ({ ...prefs, saved_doc_id: docid, saved_doc_name: '' }));
 		} catch (e) {
 			console.log('error reading file', e);
 			savedComment = 'Error reading file, maybe log in?';
@@ -79,6 +80,7 @@
 		});
 		request.then(function (response) {
 			docMeta = response.result;
+			prefsStore.update((prefs) => ({ ...prefs, saved_doc_name: docMeta.name }));
 		});
 	}
 
@@ -163,6 +165,10 @@
 			console.log('got param id', <string>params.get('docid'));
 		}
 
+		if ($prefsStore.saved_doc_id.length > 0) {
+			cloudDocStore.setLocalDocId($prefsStore.saved_doc_id);
+		}
+
 		Monaco = await import('monaco-editor');
 
 		editor = Monaco.editor.create(<HTMLElement>divEl, {
@@ -182,7 +188,14 @@
 	});
 </script>
 
-<a bind:this={runLink} href="{base}/run" target="_self">Run this program</a>
+<a
+	bind:this={runLink}
+	on:click={() => {
+		saveFile();
+	}}
+	href="{base}/run"
+	target="_self">Run this program</a
+>
 <input
 	type="checkbox"
 	name="default includes"
@@ -209,6 +222,13 @@ Apply Default Imports
 			navigator.clipboard.writeText(
 				window.location.toString().split('?')[0] + '?docid=' + loaded_doc
 			)}>Copy Link</button
+	>
+	<button
+		on:click={() => {
+			loaded_doc = '';
+			docMeta = null;
+			cloudDocStore.setParamId('');
+		}}>Clear</button
 	>
 {/if}
 
