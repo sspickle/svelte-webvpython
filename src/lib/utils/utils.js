@@ -11,7 +11,7 @@ export const getPyodide = async (stdOutRedir, stdErrRedir, url) => {
 			stdout: stdOutRedir ? stdOutRedir : null,
 			stderr: stdErrRedir ? stdErrRedir : null
 		});
-		//await pyodide.loadPackage('micropip'); revert this for now
+		//await pyodide.loadPackage('micropip'); // revert this for now
 		//await pyodide.runPythonAsync(mpipCode);
 	} catch (e) {
 		console.log(e);
