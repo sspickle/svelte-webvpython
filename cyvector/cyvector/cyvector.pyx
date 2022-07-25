@@ -64,7 +64,7 @@ cdef class vector(object):
         return '<{:.6g}, {:.6g}, {:.6g}>'.format(self._x, self._y, self._z)
 
     def __add__(self,other):
-        if type(other) is vector:
+        if isinstance(other,vector):
             return vector(self._x + other._x, self._y + other._y, self._z + other._z)
         return NotImplemented
 
@@ -74,7 +74,7 @@ cdef class vector(object):
         return NotImplemented
 
     def __sub__(self,other):
-        if type(other) is vector:
+        if isinstance(other,vector):
             return vector(self._x - other._x, self._y - other._y, self._z - other._z)
         return NotImplemented
 
