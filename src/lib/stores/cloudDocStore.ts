@@ -3,12 +3,14 @@ import { writable } from 'svelte/store';
 export interface ICloudDocStore {
 	auth_token: string;
 	doc_id: string;
+	doc_url: string;
 	signInPending: boolean;
 }
 
 const defaultDocStore: ICloudDocStore = {
 	auth_token: '',
 	doc_id: '',
+	doc_url: '',
 	signInPending: false
 };
 
@@ -19,11 +21,17 @@ class StoreLogic {
 	authToken = ''; // the auth token for reading
 	pickLoaded = false; // was the pick lib loaded yet?
 	driveLoaded = false; // was the drive lib loaded yet?
+	docURL = '';
 	signedIn = false;
 	signInPending = false;
 
 	setPicked(doc: string) {
 		this.pickedDoc = doc;
+		this.checkDocId();
+	}
+
+	setDocURL(url: string) {
+		this.docURL = url;
 		this.checkDocId();
 	}
 
@@ -57,6 +65,10 @@ class StoreLogic {
 	}
 
 	checkDocId() {
+		if (this.docURL.length > 0) {
+			update((curr: ICloudDocStore) => ({ ...curr, doc_url: this.docURL })); // update the store
+		}
+
 		if (this.paramDoc.length > 0 && !this.signedIn) {
 			console.log('checkDocId: paramDoc but not signed in.. setting signin pending');
 			update((curr: ICloudDocStore) => ({ ...curr, signInPending: true }));
@@ -119,6 +131,9 @@ function createStore() {
 		},
 		setSignedIn: (signedIn: boolean) => {
 			storeLogic.setSignedIn(signedIn);
+		},
+		setDocURL: (url: string) => {
+			storeLogic.setDocURL(url);
 		}
 	};
 }

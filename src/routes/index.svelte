@@ -35,10 +35,21 @@
 			loadFileIntoSrcStore(currDocStore.doc_id);
 		} else if (currDocStore.signInPending) {
 			signInPending = true;
+		} else if (currDocStore.doc_url) {
+			loadURLIntoDocStore(currDocStore.doc_url);
+		} else {
+			isSignedIn = false;
 		}
 	});
 
 	onDestroy(unsubscribe);
+
+	const loadURLIntoDocStore = async (url: string) => {
+		console.log('loading url', url);
+		const res = await fetch(url);
+		const body = await res.text();
+		srcStore.set(body);
+	};
 
 	const loadFileIntoSrcStore = async (docid: string) => {
 		savedComment = 'loading file...';
@@ -165,7 +176,12 @@
 			console.log('got param id', <string>params.get('docid'));
 		}
 
-		if ($prefsStore.saved_doc_id.length > 0) {
+		if (params.has('docurl')) {
+			cloudDocStore.setDocURL(decodeURIComponent(<string>params.get('docurl')));
+			console.log('got param url', <string>params.get('docurl'));
+		}
+
+		if ($prefsStore.saved_doc_id?.length > 0) {
 			cloudDocStore.setLocalDocId($prefsStore.saved_doc_id);
 		}
 
