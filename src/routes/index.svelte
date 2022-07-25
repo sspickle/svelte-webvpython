@@ -12,6 +12,7 @@
 	import { cloudDocStore, type ICloudDocStore } from '$lib/stores/cloudDocStore';
 	import { onDestroy } from 'svelte';
 	import GoogleButton from '$lib/components/GoogleButton.svelte';
+	import { goto } from '$app/navigation';
 
 	const SCOPES =
 		'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.install';
@@ -104,7 +105,7 @@
 		});
 	}
 
-	function updateFile(driveId: string) {
+	function updateFile(driveId: string, cb: () => void = () => {}) {
 		return new Promise((resolve, reject) => {
 			gapi.client
 				.request({
@@ -118,6 +119,7 @@
 				})
 				.then((response) => {
 					savedComment = '(saved!)';
+					cb();
 				})
 				.catch((error) => {
 					reject(console.log(error));
@@ -215,8 +217,15 @@
 
 <a
 	bind:this={runLink}
-	on:click={() => {
-		saveFile();
+	on:click|preventDefault={async () => {
+		if (loaded_doc.length > 0) {
+			updateFile(loaded_doc, () => {
+				console.log('saved');
+				goto(`${base}/run`);
+			});
+		} else {
+			goto(`${base}/run`);
+		}
 	}}
 	href="{base}/run"
 	target="_self">Run this program</a
