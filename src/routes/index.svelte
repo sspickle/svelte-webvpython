@@ -46,10 +46,18 @@
 	onDestroy(unsubscribe);
 
 	const loadURLIntoDocStore = async (url: string) => {
-		console.log('loading url', url);
-		const res = await fetch(url);
-		const body = await res.text();
-		srcStore.set(body);
+		console.log('loading url in loadURLIntoDocStore', url);
+		try {
+			const res = await fetch(url);
+			console.log('got result');
+			const body = await res.text();
+			console.log('got body');
+			srcStore.set(body);
+			editor.setValue(body);
+			console.log('loaded url', url);
+		} catch (e) {
+			console.log('error loading url', e);
+		}
 	};
 
 	const loadFileIntoSrcStore = async (docid: string) => {
@@ -249,6 +257,7 @@ Apply Default Imports
 		cloudDocStore.setParamId('');
 		cloudDocStore.setLocalDocId('');
 		window.location.search = '';
+		srcStore.set('');
 		editor.setValue('');
 	}}>Clear</button
 >
