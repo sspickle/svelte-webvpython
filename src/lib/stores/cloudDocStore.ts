@@ -39,12 +39,16 @@ class StoreLogic {
 
 	setParam(doc: string) {
 		this.paramDoc = doc;
-		this.checkDocId();
+		if (doc.length > 0) {
+			this.checkDocId();
+		}
 	}
 
 	setLocalDocId(docId: string) {
 		this.lastDocId = docId;
-		this.checkDocId();
+		if (docId.length > 0) {
+			this.checkDocId();
+		}
 	}
 
 	setAuthId(auth_token: string) {

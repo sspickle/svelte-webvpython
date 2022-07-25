@@ -223,14 +223,18 @@ Apply Default Imports
 				window.location.toString().split('?')[0] + '?docid=' + loaded_doc
 			)}>Copy Link</button
 	>
-	<button
-		on:click={() => {
-			loaded_doc = '';
-			docMeta = null;
-			cloudDocStore.setParamId('');
-		}}>Clear</button
-	>
 {/if}
+<button
+	on:click={() => {
+		loaded_doc = '';
+		docMeta = null;
+		prefsStore.update((prefs) => ({ ...prefs, saved_doc_id: '' }));
+		cloudDocStore.setParamId('');
+		cloudDocStore.setLocalDocId('');
+		window.location.search = '';
+		editor.setValue('');
+	}}>Clear</button
+>
 
 <GoogleButton {SCOPES} bind:isSignedIn bind:signInPending {authCallback} />
 
