@@ -185,14 +185,10 @@
 		if (params.has('docid')) {
 			cloudDocStore.setParamId(<string>params.get('docid'));
 			console.log('got param id', <string>params.get('docid'));
-		}
-
-		if (params.has('docurl')) {
+		} else if (params.has('docurl')) {
 			cloudDocStore.setDocURL(decodeURIComponent(<string>params.get('docurl')));
 			console.log('got param url', <string>params.get('docurl'));
-		}
-
-		if ($prefsStore.saved_doc_id?.length > 0) {
+		} else if ($prefsStore.saved_doc_id?.length > 0) {
 			cloudDocStore.setLocalDocId($prefsStore.saved_doc_id);
 		}
 
