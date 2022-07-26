@@ -15,7 +15,7 @@
 	import { goto } from '$app/navigation';
 
 	const SCOPES =
-		'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.install';
+		'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.install';
 
 	let docMeta: any = null; // metadata for the docid we're editing
 	const driveUploadPath = 'https://www.googleapis.com/upload/drive/v3/files';
