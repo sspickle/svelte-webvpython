@@ -12,7 +12,8 @@
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
 		"format": "prettier --write --plugin-search-dir=. .",
-		"zip": "zip -r ./static/vpython.zip vpython"
+		"zip": "zip -r ./static/vpython.zip vpython",
+		"deploy": "gcloud app deploy build/app.yaml"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.22.2",
