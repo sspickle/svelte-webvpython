@@ -26,6 +26,11 @@ Preview the production build with `npm run preview`.
 To build the vpython package:
 
 ```
-cd vpython
-zip -r ../static/vpython.zip vpython
+npm run zip
+```
+
+To deploy on GAE:
+
+```
+npm run deploy
 ```
