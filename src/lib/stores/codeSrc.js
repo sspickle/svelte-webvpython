@@ -6,12 +6,12 @@ box()
 `;
 
 const localStorageKey = 'code';
-const origLocalStorageCode = browser ? localStorage.getItem(localStorageKey) : null;
+const origLocalStorageCode = browser ? sessionStorage.getItem(localStorageKey) : null;
 
 export const srcStore = writable(origLocalStorageCode ? origLocalStorageCode : initialCode);
 
 if (browser) {
 	srcStore.subscribe((code) => {
-		localStorage.setItem(localStorageKey, code);
+		sessionStorage.setItem(localStorageKey, code);
 	});
 }

@@ -11,7 +11,7 @@ const localStorageKey = 'prefs';
 let origLocalStoragePrefs = null;
 
 if (browser) {
-	let localStoragePrefsJSON = localStorage.getItem(localStorageKey);
+	let localStoragePrefsJSON = sessionStorage.getItem(localStorageKey);
 	if (localStoragePrefsJSON) {
 		origLocalStoragePrefs = JSON.parse(localStoragePrefsJSON);
 	}
@@ -22,7 +22,7 @@ export const prefsStore = writable(origLocalStoragePrefs ? origLocalStoragePrefs
 if (browser) {
 	prefsStore.subscribe((prefs) => {
 		if (prefs) {
-			localStorage.setItem(localStorageKey, JSON.stringify(prefs));
+			sessionStorage.setItem(localStorageKey, JSON.stringify(prefs));
 		}
 	});
 }
