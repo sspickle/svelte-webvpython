@@ -124,6 +124,7 @@
 				.catch((error) => {
 					reject(console.log(error));
 					savedComment = '(error!)';
+					cb(); // this might happen if the file is read-only...
 				});
 		});
 	}
@@ -215,6 +216,7 @@
 	bind:this={runLink}
 	on:click|preventDefault={async () => {
 		if (loaded_doc.length > 0) {
+			// check if file is read-only first...
 			updateFile(loaded_doc, () => {
 				console.log('saved');
 				goto(`${base}/run`);
