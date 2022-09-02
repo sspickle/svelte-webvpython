@@ -24,7 +24,7 @@
 	let scene: any;
 	let mounted: boolean = false;
 	let applyDefaultImports: boolean = $prefsStore.add_default_imports;
-	let pyodideURL = 'https://cdn.jsdelivr.net/pyodide/v0.21.1/full/'; //'https://cdn.jsdelivr.net/pyodide/v0.21.0a3/full/',
+	let pyodideURL = 'https://cdn.jsdelivr.net/pyodide/v0.21.2/full/'; //'https://cdn.jsdelivr.net/pyodide/v0.21.0a3/full/',
 
 	let defaultImportCode = `from math import *
 from numpy import arange
